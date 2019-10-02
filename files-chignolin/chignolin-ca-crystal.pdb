@@ -1,0 +1,21 @@
+ATOM      1  CA  TYR A   1      24.935  20.652  10.774  1.00  7.05      A    C  
+ANISOU    1  CA  TYR A   1      874    959    848   -150   -142     73  A    C  
+ATOM      2  CA  TYR A   2      21.801  19.381   9.017  1.00  4.77      A    C  
+ANISOU    2  CA  TYR A   2      551    418    842     72     51     88  A    C  
+ATOM      3  CA  ASP A   3      18.477  20.539  10.432  1.00  5.27      A    C  
+ANISOU    3  CA  ASP A   3      729    665    608    158     98    -64  A    C  
+ATOM      4  CA  PRO A   4      16.223  17.660  11.537  1.00  5.94      A    C  
+ANISOU    4  CA  PRO A   4      910    578    767     82     75    -31  A    C  
+ATOM      5  CA  GLU A   5      13.040  19.289  10.212  1.00  7.65      A    C  
+ANISOU    5  CA  GLU A   5      663    949   1296    212    156     10  A    C  
+ATOM      6  CA  THR A   6      14.200  20.806   6.941  1.00  8.29      A    C  
+ANISOU    6  CA  THR A   6     1051   1116    983     74   -166     74  A    C  
+ATOM      7  CA  GLY A   7      17.256  18.676   6.039  1.00  5.88      A    C  
+ANISOU    7  CA  GLY A   7      780    581    874   -199   -150     78  A    C  
+ATOM      8  CA  THR A   8      19.242  21.760   5.125  1.00  5.66      A    C  
+ANISOU    8  CA  THR A   8      740    585    827   -270   -164     23  A    C  
+ATOM      9  CA  TRP A   9      22.762  22.680   6.241  1.00  4.78      A    C  
+ANISOU    9  CA  TRP A   9      723    538    556    -74      0      6  A    C  
+ATOM     10  CA  TYR A  10      23.135  25.467   8.794  1.00  5.77      A    C  
+ANISOU   10  CA  TYR A  10      999    524    669   -145    -87     15  A    C  
+END

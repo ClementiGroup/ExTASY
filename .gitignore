@@ -1,0 +1,9 @@
+results/
+__pycache__/
+*.wcfgc
+*.log
+*.prof
+.rp,session.*
+.re.session.*
+re.session.*
+rp.session.*
