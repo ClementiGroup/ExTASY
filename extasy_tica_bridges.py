@@ -119,12 +119,12 @@ def create_workflow(Kconfig,args):
           sim_task.gpu_reqs = { 'processes': 1,
                                     'process_type': None,
                                     'threads_per_process': 1,
-                                    'thread_type': None
+                                    'thread_type': 'OpenMP'
                                 }
-          sim_task.cpu_reqs = { 'processes': 0, 
+          sim_task.cpu_reqs = { 'processes': 1, 
                                     'process_type': None, 
-                                    'threads_per_process': 0, 
-                                    'thread_type': None
+                                    'threads_per_process': 1, 
+                                    'thread_type': 'CUDA'
                                   }
           sim_task.arguments = ['python','run_openmm.py',
                                   '--trajstride', str(Kconfig.trajstride),'--Kconfig', str(args.Kconfig), 
