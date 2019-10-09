@@ -35,7 +35,7 @@ def create_workflow(Kconfig,args):
     num_replicas=int(Kconfig.num_replicas)
     script_ana=str(Kconfig.script_ana)#run-tica-msm4.py
     vpy4_settings = ['module load anaconda','source
-            /opt/packages/anaconda/anaconda2-5.2.0/etc/profile.d/conda.sh',
+            /opt/packages/anaconda/anaconda3-5.2.0/etc/profile.d/conda.sh',
             'conda activate vampextasy', 'printenv > env.log', 'export
             OMP_NUM_THREADS=1', 'export PYEMMA_NJOBS=1']
 
