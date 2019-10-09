@@ -19,8 +19,8 @@ remote_output_directory = '/$SCRATCH/extasy_tica3_chignolin_long'
 
 #--------------------------Simulation--------------------------------
 system                  = 'CLN025'
-md_env                  = 'vpy8'
-ana_env                 = 'vpy8'
+md_env                  = 'vpy4'
+ana_env                 = 'vpy4'
 md_steps                = 1000    #100000=2min
 md_dir                  = './files-chignolin/'
 md_input_file           = 'chignolin.pdb'        # Entire path to the MD Input file - Do not use $HOME or the likes
