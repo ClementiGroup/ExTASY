@@ -3,7 +3,7 @@
 REMOTE_HOST             = 'xsede.bridges'   #'ncsa.bw' 'ncsa.bw_aprun'     # Label/Name of the Remote Machine
 ALLOCATION              = 'mc3bggp'                    # Allocation to be charged
 use_gpus                = 'True'
-QUEUE                   = 'RM' #'high'      #'normal'             # Name of the queue in the remote machine
+QUEUE                   = 'GPU' #'high'      #'normal'             # Name of the queue in the remote machine
 
 #--------------------------General--------------------------------
 WALLTIME                = 120    #1440    #120         # Walltime to be requested for the pilot in minutes
