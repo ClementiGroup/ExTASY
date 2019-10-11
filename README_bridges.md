@@ -70,7 +70,7 @@ Other instructions are omitted as described in the `README.md`
 
 ### Run on Bridges login node (Client Inside)
 
-Extasy can be located in Bridges which will be one of login nodes e.g. `[user@login018 ~]`. This will require `ssh` to connect to Bridges using PSC credentials like `gsissh` to connect from outside. This needs to exercise the ssh key registration at PSC described below.
+Extasy can be located in Bridges which will be one of login nodes e.g. `[user@login018 ~]`. This will require `ssh` to connect to Bridges using PSC credentials similar to `gsissh` from outside. This needs to exercise the ssh key registration at PSC described below.
 
 - Setting up a PSC password if not done before, this is not XSEDE password. (https://apr.psc.edu/autopwdreset/autopwdreset.html)
 - If your PSC account is not active or not created, contact to bridges@psc.edu.
