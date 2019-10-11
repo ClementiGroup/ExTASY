@@ -78,7 +78,7 @@ Extasy can be located in Bridges which will be one of login nodes e.g. `[user@lo
    - Note that the key has to be passwordless
 - Administrator reviews/authorizes a key registration in 1-2 days
 
-Once a key registration is complete, setup conda or virtualenv on Bridges login nodes: go back to the [installation](#rct_install)
+Once a key registration is complete, setup conda or virtualenv on Bridges login nodes: go back to the [installation](#python2-remote-rct-installation-on-bridges-)
 - place the private key (passphraseless) in `~/.ssh/` with a name `id_rsa`
     - use a vim/nano/emacs editor for a quick copy and paste of key strings
 - change the permission to `read/write for owner only` by
