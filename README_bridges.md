@@ -1,7 +1,7 @@
 
 ## Conda Environment Setup on XSEDE Bridges
 
-### Python2 remote RCT installation on Bridges
+### Python2 remote RCT installation on Bridges <a href="rct_install"></a>
 
 ```
 module load anaconda2
@@ -67,3 +67,25 @@ python extasy_tica_bridges.py --Kconfig settings_extasy_tica3_chignolin_long_bri
 
 Other instructions are omitted as described in the `README.md`
 
+
+### Run on Bridges login node (Client Inside)
+
+Extasy can be located in Bridges which will be one of login nodes e.g. `[user@login018 ~]`. This will require `ssh` to connect to Bridges using PSC credentials like `gsissh` to connect from outside. This needs to exercise the ssh key registration at PSC described below.
+
+- Setting up a PSC password if not done before, this is not XSEDE password. (https://apr.psc.edu/autopwdreset/autopwdreset.html)
+- If your PSC account is not active or not created, contact to bridges@psc.edu.
+- Create a ssh key pair or use existing one to submit a key (public key, i.e. `.pub` file extension) to PSC (https://grants.psc.edu/cgi-bin/ssh/listKeys.pl)
+   - Note that the key has to be passwordless
+- Administrator reviews/authorizes a key registration in 1-2 days
+
+Once a key registration is complete, setup conda or virtualenv on Bridges login nodes: go back to the [installation](#rct_install)
+- place the private key (passphraseless) in `~/.ssh/` with a name `id_rsa`
+    - use a vim/nano/emacs editor for a quick copy and paste of key strings
+- change the permission to `read/write for owner only` by
+    - ```chmod 600 ~/.ssh/id_rsa```
+- Verify ssh passwordless connection by
+    - ```ssh bridges```
+
+Last step is to specify `ssh` as a protocol instead of `gsissh` as we run Extasy inside of Bridges.
+- Change the script i.e. `extasy_tica_bridges.py`
+- `access_schema` has to be `ssh` in the `res_dict` e.g. line 270 and 283 in the script, `gsissh` only works with myproxy credentials
