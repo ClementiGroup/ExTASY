@@ -34,29 +34,10 @@ def create_workflow(Kconfig,args):
     num_parallel=int(Kconfig.NODESIZE)
     num_replicas=int(Kconfig.num_replicas)
     script_ana=str(Kconfig.script_ana)#run-tica-msm4.py
-    vpy4_settings = ['module load anaconda','source
-            /opt/packages/anaconda/anaconda3-5.2.0/etc/profile.d/conda.sh',
-            'conda activate vampextasy', 'printenv > env.log', 'export
-            OMP_NUM_THREADS=1', 'export PYEMMA_NJOBS=1']
+    vpy4_settings = ['module load cuda/10.1','module load anaconda3','source /opt/packages/anaconda/anaconda3-5.2.0/etc/profile.d/conda.sh',        'conda activate vampextasy', 'printenv > env.log', 'export OMP_NUM_THREADS=1', 'export PYEMMA_NJOBS=1']
 
-    vpy4_2_settings= ['module unload bwpy', 'module load bwpy', 'export MODULEPATH="/sw/bw/bwpy/modulefiles/:${MODULEPATH}"', 'export CPATH="${BWPY_INCLUDE_PATH}"', 'export LIBRARY_PATH="${BWPY_LIBRARY_PATH}"', 'export LDFLAGS="${LDFLAGS} -Wl,--rpath=${BWPY_LIBRARY_PATH}"', 'module load craype-ml-plugin-py3/1.1.0', 'export MPICH_GNI_MALLOC_FALLBACK=enabled', ' export MPICH_GNI_MAX_VSHORT_MSG_SIZE=64', 'export MPICH_MAX_THREAD_SAFETY=multiple', 'export MPICH_RMA_OVER_DMAPP=1', 'export OPENMM_PLUGIN_DIR=/mnt/bwpy/single/usr/lib/plugin', 'source /projects/sciteam/bamm/hruska/vpy4/bin/activate', 'bwpy-environ', 'printenv > env.log', 'export OMP_NUM_THREADS=1', 'export PYEMMA_NJOBS=1']  
-    vpy8_settings=['module unload PrgEnv-cray', 'module load PrgEnv-gnu', 'module unload gcc','module load gcc/5.3.0','module unload bwpy','module load bwpy/2.0.0-pre0', 'module load bwpy-mpi', 'module add cudatoolkit', 'export MODULEPATH="/sw/bw/bwpy/modulefiles/:${MODULEPATH}"', 'export CPATH="${BWPY_INCLUDE_PATH}"', 'export LDFLAGS="${LDFLAGS} -Wl,--rpath=${BWPY_LIBRARY_PATH}"', 'module load craype-ml-plugin-py3/1.1.0', 'export MPICH_GNI_MALLOC_FALLBACK=enable', 'export MPICH_GNI_MAX_VSHORT_MSG_SIZE=64', 'export MPICH_MAX_THREAD_SAFETY=multiple', 'export MPICH_RMA_OVER_DMAPP=1', 'export OPENMM_PLUGIN_DIR=/mnt/bwpy/single/usr/lib/plugins','source /projects/sciteam/bamm/hruska/vpy8/bin/activate','printenv > env.log', 'export OMP_NUM_THREADS=1', 'export PYEMMA_NJOBS=1']
-    vpy9_settings=['module unload PrgEnv-cray', 'module load PrgEnv-gnu', 'module unload gcc','module load gcc/5.3.0','module unload bwpy','module load bwpy/2.0.0-pre1', 'module load bwpy-mpi', 'module add cudatoolkit', 'export MODULEPATH="/sw/bw/bwpy/modulefiles/:${MODULEPATH}"', 'export CPATH="${BWPY_INCLUDE_PATH}"', 'export LDFLAGS="${LDFLAGS} -Wl,--rpath=${BWPY_LIBRARY_PATH}"', 'export MPICH_GNI_MALLOC_FALLBACK=enable', 'export MPICH_GNI_MAX_VSHORT_MSG_SIZE=64', 'export MPICH_MAX_THREAD_SAFETY=multiple', 'export MPICH_RMA_OVER_DMAPP=1', 'export OPENMM_PLUGIN_DIR=/mnt/bwpy/single/usr/lib/plugins','source /projects/sciteam/bamm/hruska/vpy9/bin/activate','printenv > env.log', 'export OMP_NUM_THREADS=1', 'export PYEMMA_NJOBS=1'] #'module load craype-ml-plugin-py3/1.1.0'
     if Kconfig.md_env=='vpy4':
       md_settings=vpy4_settings
-    if Kconfig.md_env=='vpy8':
-      md_settings=vpy8_settings
-    if Kconfig.ana_env=='vpy8':
-      ana_settings=vpy8_settings
-    if Kconfig.md_env=='vpy9':
-      md_settings=vpy9_settings
-    if Kconfig.ana_env=='vpy9':
-      ana_settings=vpy9_settings
-
-    #if cur_iter==0:
-    #	restart_iter=0
-    #else:
-    #	restart_iter=cur_iter
 
 
     if cur_iter==0:

@@ -33,6 +33,7 @@ module load anaconda2
 source /opt/packages/anaconda/anaconda2-5.2.0/etc/profile.d/conda.sh
 conda create -n entk python=2.7.15
 conda activate entk
+conda install numpy
 radical-stack
 ```
 
