@@ -7,9 +7,10 @@ QUEUE                   = 'GPU' #'high'      #'normal'             # Name of the
 
 #--------------------------General--------------------------------
 WALLTIME                = 120    #1440    #120         # Walltime to be requested for the pilot in minutes
-NODESIZE                = 1
+NODESIZE                = 2
 num_replicas            = 1                 #total num replica
 num_parallel_MD_sim     = 1    #160           # Total Number of tasks or Compute Units
+GPUs_per_NODE           = 2
 CPUs_per_NODE           = 28                   # each replica uses that many Cus
 
 num_iterations          = 5                    # Number of iterations of Simulation-Analysis

@@ -38,7 +38,8 @@ def create_workflow(Kconfig,args):
 
     if Kconfig.md_env=='vpy4':
       md_settings=vpy4_settings
-
+    if Kconfig.ana_env=='vpy4':
+      ana_settings=vpy4_settings
 
     if cur_iter==0:
       pre_proc_stage = Stage()
@@ -100,12 +101,12 @@ def create_workflow(Kconfig,args):
           sim_task.gpu_reqs = { 'processes': 1,
                                     'process_type': None,
                                     'threads_per_process': 1,
-                                    'thread_type': 'OpenMP'
+                                    'thread_type': 'CUDA'
                                 }
           sim_task.cpu_reqs = { 'processes': 1, 
                                     'process_type': None, 
                                     'threads_per_process': 1, 
-                                    'thread_type': 'CUDA'
+                                    'thread_type': 'OpenMP'
                                   }
           sim_task.arguments = ['python','run_openmm.py',
                                   '--trajstride', str(Kconfig.trajstride),'--Kconfig', str(args.Kconfig), 
@@ -258,7 +259,7 @@ if __name__ == '__main__':
             #'cores': Kconfig.PILOTSIZE,
             'cpus': Kconfig.NODESIZE*Kconfig.CPUs_per_NODE,
             #'cpu_processes': Kconfig.num_CUs_per_MD_replica,#PILOTSIZE,
-            'gpus': Kconfig.NODESIZE,
+            'gpus': Kconfig.NODESIZE*Kconfig.GPUs_per_NODE,
             'project': Kconfig.ALLOCATION,
             'queue': Kconfig.QUEUE,
             'access_schema': 'gsissh'
@@ -279,7 +280,7 @@ if __name__ == '__main__':
                                            Kconfig.md_dir+Kconfig.md_reference,
                                            Kconfig.md_run_dir+Kconfig.md_run_file,
                                            Kconfig.md_dir+Kconfig.md_input_file,
-                                          '%s/%s' %(Kconfig.helper_scripts, script_ana), '%s/%s' %(Kconfig.helper_scripts, 'analyze3.py')  ]
+                                          '%s/%s' %(Kconfig.helper_scripts, script_ana)  ]
         else:
           shared_data_all=shared_data_all+[Kconfig.md_dir+Kconfig.md_input_file,
                                            Kconfig.md_dir+Kconfig.md_reference,
