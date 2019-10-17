@@ -101,6 +101,10 @@ Sample output
 0.19.2
 ```
 
+## MSMTools
 
+```
+pip install msmtools
+```
 
 
