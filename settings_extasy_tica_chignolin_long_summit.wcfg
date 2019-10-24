@@ -1,0 +1,52 @@
+
+
+REMOTE_HOST             = 'ornl.summit'   #'ncsa.bw' 'ncsa.bw_aprun'     # Label/Name of the Remote Machine
+ALLOCATION              = 'BIP191'                    # Allocation to be charged
+use_gpus                = 'True'
+QUEUE                   = 'GPU' #'high'      #'normal'             # Name of the queue in the remote machine
+
+#--------------------------General--------------------------------
+WALLTIME                = 120    #1440    #120         # Walltime to be requested for the pilot in minutes
+NODESIZE                = 2
+num_replicas            = 1                 #total num replica
+num_parallel_MD_sim     = 1    #160           # Total Number of tasks or Compute Units
+GPUs_per_NODE           = 2
+CPUs_per_NODE           = 28                   # each replica uses that many Cus
+
+num_iterations          = 5                    # Number of iterations of Simulation-Analysis
+start_iter              = 0                    # Iteration number with which to start
+nsave                   = 1                    # number of iterations after which output is transfered to local machine
+remote_output_directory = '/gpfs/alpine/proj-shared/bip191/extasy_tica_chignolin'   
+
+#--------------------------Simulation--------------------------------
+system                  = 'CLN025'
+md_env                  = ["module load cuda/9.1.85", "module load cmake","module load gcc/7.4.0","module load python/3.6.6-anaconda3-5.3.0","conda activate vampextasy"]
+env_ana_same             = 'True'
+#ana_env                 = 'vpy4'
+md_steps                = 10000    #100000=2min
+md_dir                  = './files-chignolin/'
+md_input_file           = 'chignolin.pdb'        # Entire path to the MD Input file - Do not use $HOME or the likes
+md_reference            = 'chignolin-ca-crystal.pdb'
+md_run_file             = 'run-openmm2.py' #-long.mdp'    #grompp.mdp   # Entire path to the MD Parameters file - Do not use $HOME or the likes
+md_run_dir              = './helper_scripts/'
+md_use_xml              = 'yes'
+trajstride              = 10
+
+#--------------------------Analysis----------------------------------
+helper_scripts          = './helper_scripts'
+script_ana              = 'run-tica-msm5.py'
+koopman                 = 'yes'
+#koopman                 = 'no'
+#strategy                = 'cmicro'
+strategy                = 'extend'
+#strategy                = 'cmacro'
+
+select_n_macro_type     = 'const'    #'kin_content'
+num_macrostates         = 20
+
+tica_lag                = 440
+tica_dim                = 10
+tica_stride             = 1
+msm_stride              = 1
+msm_states              = 200
+msm_lag                 = 440

@@ -14,6 +14,7 @@ module load gcc/7.4.0
 ## Required Packages
 
 ```
+pip install radical.entk
 conda install -y swig
 conda install -y numpy
 conda install -y cython
@@ -75,7 +76,7 @@ All differences are within tolerance.
 ## TensorFlow-GPU
 
 ```
-conda install -y tensorflow-gpu=1.2.1=py27cuda8.0cudnn6.0_0
+conda install -y tensorflow-gpu
 ```
 
 ## MDAnalysis
@@ -107,4 +108,7 @@ Sample output
 pip install msmtools
 ```
 
-
+## verify entk
+```
+radical-stack
+```
