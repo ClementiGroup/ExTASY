@@ -31,7 +31,7 @@ def create_workflow(Kconfig,args):
       combined_path=str(Kconfig.remote_output_directory)+'-giotto' 
     else:
       combined_path=str(Kconfig.remote_output_directory)  #'/u/sciteam/hruska/scratch/extasy-tica'
-    num_parallel=int(Kconfig.NODESIZE)
+    num_parallel=int(Kconfig.NODESIZE)*int(Kconfig.GPUs_per_NODE)
     num_replicas=int(Kconfig.num_replicas)
     script_ana=str(Kconfig.script_ana)#run-tica-msm4.py
 
@@ -40,7 +40,7 @@ def create_workflow(Kconfig,args):
       ana_settings=md_settings
     else:
       ana_settings=Kconfig.ana_env
-
+    print("set", num_parallel,md_settings)
     if cur_iter==0:
       pre_proc_stage = Stage()
       pre_proc_task = Task()
@@ -83,18 +83,21 @@ def create_workflow(Kconfig,args):
         sim_task_ref = list()
         def_rep_per_thread=int(np.ceil(num_replicas/num_parallel))
         num_allocated_rep=0
-        num_used_threads=0
+        #num_used_threads=0
+        #print(def_rep_per_thread)
         while(num_allocated_rep<num_replicas):
-          if (num_used_threads==num_parallel):
-             print("ALLERT tried use more gpus than allocated")
-          if ((num_replicas-num_allocated_rep)>def_rep_per_thread):
-             use_replicas=def_rep_per_thread
-          else:
-             use_replicas=(num_replicas-num_allocated_rep)
+          #if (num_used_threads>=num_parallel):
+          #   print("ALLERT tried use more gpus than allocated")
+          use_replicas=min(def_rep_per_thread+1, num_replicas-num_allocated_rep)
+          #if ((num_replicas-num_allocated_rep)>def_rep_per_thread):  # check if use all threads
+          #   use_replicas=def_rep_per_thread
+          #else:  #use pnly part of threads
+          #   use_replicas=(num_replicas-num_allocated_rep)
+          print("u", use_replicas, num_replicas, num_parallel, def_rep_per_thread, num_allocated_rep)
           sim_task = Task()
-          sim_task.executable = ['bash']#'python']
+          sim_task.executable = ['python']
           
-	  pre_exec_arr = md_settings + ['export tasks=md','export iter=%s' % cur_iter ]
+          pre_exec_arr = md_settings + ['export tasks=md','export iter=%s' % cur_iter ]
           #if cur_iter==0 and num_allocated_rep==0:
           #  pre_exec_arr = pre_exec_arr + [ 'mv %s']
           sim_task.pre_exec = pre_exec_arr
@@ -108,7 +111,7 @@ def create_workflow(Kconfig,args):
                                     'threads_per_process': 1, 
                                     'thread_type': 'OpenMP'
                                   }
-          sim_task.arguments = ['python','run_openmm.py',
+          sim_task.arguments = ['run_openmm.py',
                                   '--trajstride', str(Kconfig.trajstride),'--Kconfig', str(args.Kconfig), 
                                   '--idxstart',str(num_allocated_rep), '--idxend',str((num_allocated_rep+use_replicas)),
                                   '--path',combined_path,'--iter',str(cur_iter),
@@ -252,7 +255,7 @@ if __name__ == '__main__':
             'access_schema': 'gsissh'
           }
         elif Kconfig.use_gpus=='True':
-          print "using gpus"
+          print("using gpus")
           res_dict = {
             'resource': Kconfig.REMOTE_HOST,
             'walltime': Kconfig.WALLTIME,
@@ -262,7 +265,8 @@ if __name__ == '__main__':
             'gpus': Kconfig.NODESIZE*Kconfig.GPUs_per_NODE,
             'project': Kconfig.ALLOCATION,
             'queue': Kconfig.QUEUE,
-            'access_schema': 'gsissh'
+            'schema': Kconfig.schema   
+            #'gsissh'
           }	  
         else:
           print("use_gpus not recognized")
@@ -291,7 +295,9 @@ if __name__ == '__main__':
         #    rman.shared_data.append(Kconfig.ndx_file)
 
         # Create Application Manager, only one extasy script on one rabbit-mq server now
-        appman = AppManager(hostname='two.radical-project.org', port=33134)#port=args.port)
+        port = int(os.environ.get('RMQ_PORT', 5672))
+        hostname = os.environ.get('RMQ_HOSTNAME', 'localhost')
+        appman = AppManager(hostname='two.radical-project.org', port=port)#port=args.port)
         #appman = AppManager(hostname='localhost', port=5672)
         # appman = AppManager(port=) # if using docker, specify port here.
         appman.resource_desc = res_dict
