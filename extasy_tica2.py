@@ -81,19 +81,20 @@ def create_workflow(Kconfig,args):
 
         sim_stage = Stage()
         sim_task_ref = list()
-        def_rep_per_thread=int(np.ceil(num_replicas/num_parallel))
         num_allocated_rep=0
+        num_used_parallel=0
         #num_used_threads=0
         #print(def_rep_per_thread)
         while(num_allocated_rep<num_replicas):
           #if (num_used_threads>=num_parallel):
           #   print("ALLERT tried use more gpus than allocated")
-          use_replicas=min(def_rep_per_thread+1, num_replicas-num_allocated_rep)
+          def_rep_per_thread=int(np.ceil(float(num_replicas-num_allocated_rep)/float(num_parallel-num_used_parallel)))
+          use_replicas=min(def_rep_per_thread, num_replicas-num_allocated_rep)
           #if ((num_replicas-num_allocated_rep)>def_rep_per_thread):  # check if use all threads
           #   use_replicas=def_rep_per_thread
           #else:  #use pnly part of threads
           #   use_replicas=(num_replicas-num_allocated_rep)
-          print("u", use_replicas, num_replicas, num_parallel, def_rep_per_thread, num_allocated_rep)
+          print("u", use_replicas, num_replicas, num_parallel, def_rep_per_thread, num_allocated_rep,num_used_parallel)
           sim_task = Task()
           sim_task.executable = ['python']
           
@@ -108,7 +109,7 @@ def create_workflow(Kconfig,args):
                                 }
           sim_task.cpu_reqs = { 'processes': 1, 
                                     'process_type': None, 
-                                    'threads_per_process': 1, 
+                                    'threads_per_process': 20, 
                                     'thread_type': 'OpenMP'
                                   }
           sim_task.arguments = ['run_openmm.py',
@@ -152,6 +153,7 @@ def create_workflow(Kconfig,args):
             #    sim_task.link_input_data.append('$SHARED/{0}'.format(os.path.basename(Kconfig.ndx_file)))
             
           num_allocated_rep=num_allocated_rep+use_replicas
+          num_used_parallel= num_used_parallel+1
           sim_task_ref.append('$Pipeline_%s_Stage_%s_Task_%s' % (wf.uid, sim_stage.uid, sim_task.uid))
           sim_stage.add_tasks(sim_task)
 
