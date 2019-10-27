@@ -41,15 +41,20 @@ def create_workflow(Kconfig,args):
     else:
       ana_settings=Kconfig.ana_env
     print("set", num_parallel,md_settings)
+    iter_found=0
+    while os.path.isfile('%s/iter%s_input0.pdb' % (combined_path, iter_found)):
+      iter_found+=1
+    cur_iter=max(0,iter_found-1)
+    print("cur_iter",cur_iter)
     if cur_iter==0:
-      pre_proc_stage = Stage()
-      pre_proc_task = Task()
-      pre_proc_task.pre_exec = ['export tasks=pre_proc_task','export iter=%s' % cur_iter, 'export OMP_NUM_THREADS=1']
-      pre_proc_task.executable = ['mv']
-      pre_proc_task.arguments = [ combined_path, combined_path + time.strftime("%Y-%m-%d-%H-%M") ]
-      pre_proc_task_ref = '$Pipeline_%s_Stage_%s_Task_%s' % (wf.uid, pre_proc_stage.uid, pre_proc_task.uid)
-      pre_proc_stage.add_tasks(pre_proc_task)
-      wf.add_stages(pre_proc_stage)
+      #pre_proc_stage = Stage()
+      #pre_proc_task = Task()
+      #pre_proc_task.pre_exec = ['export tasks=pre_proc_task','export iter=%s' % cur_iter, 'export OMP_NUM_THREADS=1']
+      #pre_proc_task.executable = ['mv']
+      #pre_proc_task.arguments = [ combined_path, combined_path + time.strftime("%Y-%m-%d-%H-%M") ]
+      #pre_proc_task_ref = '$Pipeline_%s_Stage_%s_Task_%s' % (wf.uid, pre_proc_stage.uid, pre_proc_task.uid)
+      #pre_proc_stage.add_tasks(pre_proc_task)
+      #wf.add_stages(pre_proc_stage)
       pre_proc_stage2 = Stage()
       pre_proc_task2 = Task()
       pre_proc_task2.pre_exec = ['export tasks=pre_proc_task','export iter=%s' % cur_iter, 'export OMP_NUM_THREADS=1']
@@ -58,10 +63,7 @@ def create_workflow(Kconfig,args):
       pre_proc_task2.copy_input_data = ['$SHARED/%s > %s/%s' % (args.Kconfig,combined_path, args.Kconfig),
                                      '$SHARED/%s > %s/%s' % (script_ana,combined_path,script_ana),
                                      '$SHARED/%s > %s/%s' % (Kconfig.md_run_file,combined_path,Kconfig.md_run_file),
-                                       '$SHARED/%s > %s/%s' % (Kconfig.md_reference, combined_path, Kconfig.md_reference),
-                                       '$SHARED/%s > %s/%s' % ('analyze3.py', combined_path, 'analyze3.py') ]
-
-
+                                       '$SHARED/%s > %s/%s' % (Kconfig.md_reference, combined_path, Kconfig.md_reference)]# '$SHARED/%s > %s/%s' % ('analyze3.py', combined_path, 'analyze3.py') ] 
       pre_proc_task_ref2 = '$Pipeline_%s_Stage_%s_Task_%s' % (wf.uid, pre_proc_stage2.uid, pre_proc_task2.uid)
       pre_proc_stage2.add_tasks(pre_proc_task2)
       wf.add_stages(pre_proc_stage2)
@@ -94,7 +96,7 @@ def create_workflow(Kconfig,args):
           #   use_replicas=def_rep_per_thread
           #else:  #use pnly part of threads
           #   use_replicas=(num_replicas-num_allocated_rep)
-          print("u", use_replicas, num_replicas, num_parallel, def_rep_per_thread, num_allocated_rep,num_used_parallel)
+          print("u", cur_iter, use_replicas, num_replicas, num_parallel, def_rep_per_thread, num_allocated_rep,num_used_parallel)
           sim_task = Task()
           sim_task.executable = ['python']
           

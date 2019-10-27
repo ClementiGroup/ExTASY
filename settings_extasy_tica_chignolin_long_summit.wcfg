@@ -8,11 +8,11 @@ schema                  = 'local'
 
 #--------------------------General--------------------------------
 WALLTIME                = 120    #1440    #120         # Walltime to be requested for the pilot in minutes
-NODESIZE                = 5
-num_replicas            = 200                   #total num replica #num_parallel_MD_sim     = 5    #160           # Total Number of tasks or Compute Units
+NODESIZE                = 1
+num_replicas            = 60                   #total num replica #num_parallel_MD_sim     = 5    #160           # Total Number of tasks or Compute Units
 GPUs_per_NODE           = 6
 CPUs_per_NODE           = 22                   # each replica uses that many Cus
-num_iterations          = 1                    # Number of iterations of Simulation-Analysis
+num_iterations          = 3                    # Number of iterations of Simulation-Analysis
 start_iter              = 0                    # Iteration number with which to start
 nsave                   = 1                    # number of iterations after which output is transfered to local machine
 remote_output_directory = '/gpfs/alpine/proj-shared/bip191/extasy_tica_chignolin'   
