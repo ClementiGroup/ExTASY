@@ -69,8 +69,8 @@ def create_workflow(Kconfig,args):
       wf.add_stages(pre_proc_stage2)
  
       # ------------------------------------------------------------------------------------------------------------------
-    
-    while(cur_iter <  int(Kconfig.num_iterations)):
+    start_iter=cur_iter 
+    while(cur_iter <  int(Kconfig.num_iterations) and cur_iter<start_iter+1):
 
         # --------------------------------------------------------------------------------------------------------------
         # sim_stage:

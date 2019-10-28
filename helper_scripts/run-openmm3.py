@@ -12,7 +12,7 @@ import time, random
 import simtk.unit as u
 from simtk.openmm import Platform, XmlSerializer
 from simtk.openmm.app import PDBFile, Simulation, DCDReporter, StateDataReporter
-
+from simtk.openmm.app import CheckpointReporter
 from datetime import datetime
 import argparse
 import glob
@@ -153,7 +153,8 @@ for i in range(args.idxstart,args.idxend):
   simulation.reporters.append(StateDataReporter(stdout, 1000, step=True,
   potentialEnergy=True, temperature=True)) 
   if args.save_traj=='True':
-    simulation.reporters.append(mdtraj.reporters.HDF5Reporter('/tmp/iter'+str(args.iter)+'_traj'+str(i)+'.dcd', args.trajstride, atomSubset=prot_Select)) 
+    simulation.reporters.append(mdtraj.reporters.HDF5Reporter(args.path+'/iter'+str(args.iter)+'_traj'+str(i)+'.h5', args.trajstride, atomSubset=prot_Select))
+    simulation.reporters.append(CheckpointReporter(args.path+'/iter'+str(args.iter)+'_traj'+str(i)+'.chk', args.trajstride))
   steps=args.md_steps #1000=2sec each, 10000=20sec
   start=datetime.now()
   simulation.step(steps)
@@ -169,8 +170,8 @@ for i in range(args.idxstart,args.idxend):
   print(state.getPotentialEnergy(), state.getKineticEnergy())
   PDBFile.writeFile(simulation.topology, pos, open(args.path+'/iter'+str(args.iter)+'_out'+str(i)+'.pdb', 'a'))
   del simulation, integrator, system
-  if args.save_traj=='True':
-    shutil.move('/tmp/iter'+str(args.iter)+'_traj'+str(i)+'.dcd', args.path+'/iter'+str(args.iter)+'_traj'+str(i)+'.dcd')
+  #if args.save_traj=='True':
+  #  shutil.move('/tmp/iter'+str(args.iter)+'_traj'+str(i)+'.h5', args.path+'/iter'+str(args.iter)+'_traj'+str(i)+'.h5')
 
 
 time_end_all=time.time()
