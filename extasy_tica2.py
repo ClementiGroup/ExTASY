@@ -16,7 +16,11 @@ import json
 import traceback
 import time
 import socket
-import numpy as np
+#import numpy as np
+import math
+
+# CONDA_PREFIX reads - $HOME/.conda/envs/[CONDA ENV NAME]
+PYTHON_PATH="{}/bin/python".format(os.environ['CONDA_PREFIX'])
 print(socket.gethostname())
 
 def create_workflow(Kconfig,args):
@@ -90,7 +94,7 @@ def create_workflow(Kconfig,args):
         while(num_allocated_rep<num_replicas):
           #if (num_used_threads>=num_parallel):
           #   print("ALLERT tried use more gpus than allocated")
-          def_rep_per_thread=int(np.ceil(float(num_replicas-num_allocated_rep)/float(num_parallel-num_used_parallel)))
+          def_rep_per_thread=int(math.ceil(float(num_replicas-num_allocated_rep)/float(num_parallel-num_used_parallel)))
           use_replicas=min(def_rep_per_thread, num_replicas-num_allocated_rep)
           #if ((num_replicas-num_allocated_rep)>def_rep_per_thread):  # check if use all threads
           #   use_replicas=def_rep_per_thread
@@ -98,7 +102,7 @@ def create_workflow(Kconfig,args):
           #   use_replicas=(num_replicas-num_allocated_rep)
           print("u", cur_iter, use_replicas, num_replicas, num_parallel, def_rep_per_thread, num_allocated_rep,num_used_parallel)
           sim_task = Task()
-          sim_task.executable = ['python']
+          sim_task.executable = [PYTHON_PATH]
           
           pre_exec_arr = md_settings + ['export tasks=md','export iter=%s' % cur_iter ]
           #if cur_iter==0 and num_allocated_rep==0:
@@ -173,7 +177,7 @@ def create_workflow(Kconfig,args):
           ana_task = Task()
           ana_task.pre_exec = ana_settings+ ['export tasks=tica_msm_ana', 'export iter=%s' % cur_iter ]
           ana_task.executable = ['bash']
-          ana_task.arguments = ['python', script_ana, '--path',combined_path,'--n_select', str(num_replicas),'--cur_iter',str(cur_iter), '--Kconfig', str(args.Kconfig), '--ref', str(Kconfig.md_reference), '>', 'analyse.log']
+          ana_task.arguments = [PYTHON_PATH, script_ana, '--path',combined_path,'--n_select', str(num_replicas),'--cur_iter',str(cur_iter), '--Kconfig', str(args.Kconfig), '--ref', str(Kconfig.md_reference), '>', 'analyse.log']
 
           ana_task.cpu_reqs = { 'processes': 1,
                                     'process_type': 'MPI',
@@ -275,7 +279,7 @@ if __name__ == '__main__':
         else:
           print("use_gpus not recognized")
           
-        print res_dict
+        print (res_dict)
         # Create Resource Manager object with the above resource description
         #rman = ResourceManager(res_dict)
         # Data common to multiple tasks -- transferred only once to common staging area
@@ -294,7 +298,7 @@ if __name__ == '__main__':
                                            Kconfig.md_dir+Kconfig.md_reference,
                                            Kconfig.md_run_dir+Kconfig.md_run_file,
                                           '%s/%s' %(Kconfig.helper_scripts, script_ana)]
-        print "shared_data_all", shared_data_all 
+        print ("shared_data_all", shared_data_all )
        #if Kconfig.ndx_file is not None:
         #    rman.shared_data.append(Kconfig.ndx_file)
 
@@ -318,5 +322,5 @@ if __name__ == '__main__':
 
     except Exception as ex:
 
-        print 'Error: {0}'.format(str(ex))
-        print traceback.format_exc()
+        print ('Error: {0}'.format(str(ex)))
+        print (traceback.format_exc())
