@@ -1,3 +1,5 @@
+REMARK   1 CREATED WITH MDTraj 1.9.3, 2019-10-31
+CRYST1   40.000   40.000   40.000  90.00  90.00  90.00 P 1           1 
 MODEL        0
 ATOM      1  N   TYR A   1      11.974  26.062  20.293  1.00  0.00      AP1 N   
 ATOM      2  H   TYR A   1      11.799  26.990  19.857  1.00  0.00      AP1 H   

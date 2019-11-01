@@ -4,6 +4,14 @@
 ## Conda env & modules
 
 ```
+export RADICAL_LOG_LVL="DEBUG"
+export RADICAL_LOG_TGT="radical.log"
+export RMQ_HOSTNAME=two.radical-project.org
+export RMQ_PORT=33239
+module load cuda/9.1.85
+module load cmake
+module load gcc/7.4.0
+module load python/3.6.6-anaconda3-5.3.0
 conda create -n vampextasy python=2.7.15
 conda activate vampextasy
 module load cuda/9.1.85

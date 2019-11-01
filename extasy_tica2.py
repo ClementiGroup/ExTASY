@@ -102,7 +102,7 @@ def create_workflow(Kconfig,args):
           #   use_replicas=(num_replicas-num_allocated_rep)
           print("u", cur_iter, use_replicas, num_replicas, num_parallel, def_rep_per_thread, num_allocated_rep,num_used_parallel)
           sim_task = Task()
-          sim_task.executable = [PYTHON_PATH]
+          sim_task.executable = ['python']
           
           pre_exec_arr = md_settings + ['export tasks=md','export iter=%s' % cur_iter ]
           #if cur_iter==0 and num_allocated_rep==0:
@@ -176,8 +176,8 @@ def create_workflow(Kconfig,args):
           ana_stage = Stage()
           ana_task = Task()
           ana_task.pre_exec = ana_settings+ ['export tasks=tica_msm_ana', 'export iter=%s' % cur_iter ]
-          ana_task.executable = ['bash']
-          ana_task.arguments = [PYTHON_PATH, script_ana, '--path',combined_path,'--n_select', str(num_replicas),'--cur_iter',str(cur_iter), '--Kconfig', str(args.Kconfig), '--ref', str(Kconfig.md_reference), '>', 'analyse.log']
+          ana_task.executable = ['python']
+          ana_task.arguments = [script_ana, '--path',combined_path,'--n_select', str(num_replicas),'--cur_iter',str(cur_iter), '--Kconfig', str(args.Kconfig), '--ref', str(Kconfig.md_reference), '>', 'analyse.log']
 
           ana_task.cpu_reqs = { 'processes': 1,
                                     'process_type': 'MPI',
