@@ -118,11 +118,15 @@ def create_workflow(Kconfig,args):
                                     'threads_per_process': 20, 
                                     'thread_type': 'OpenMP'
                                   }
+          if str(Kconfig.strategy)=='extend':
+            set_extend='True'
+          else:
+            set_extend='False'
           sim_task.arguments = ['run_openmm.py',
                                   '--trajstride', str(Kconfig.trajstride),'--Kconfig', str(args.Kconfig), 
                                   '--idxstart',str(num_allocated_rep), '--idxend',str((num_allocated_rep+use_replicas)),
                                   '--path',combined_path,'--iter',str(cur_iter),
-                                  '--md_steps',str(Kconfig.md_steps), '--save_traj', 'True','>', 'md.log']
+                                  '--md_steps',str(Kconfig.md_steps), '--save_traj', 'True','--extend', set_extend,'>', 'md.log']
           if Kconfig.md_use_xml=='yes':
             link_arr=['$SHARED/%s > run_openmm.py' % (os.path.basename(Kconfig.md_run_file)),
                       '$SHARED/system-5.xml > system-5.xml',
@@ -145,14 +149,14 @@ def create_workflow(Kconfig,args):
           sim_task.link_input_data = link_arr #+ copy_arr
           sim_task.copy_input_data = copy_arr
           copy_out=[]
-          if str(Kconfig.strategy)=='extend':
-            for idx in range(num_allocated_rep, num_allocated_rep+use_replicas):
+          #if str(Kconfig.strategy)=='extend':
+          #  for idx in range(num_allocated_rep, num_allocated_rep+use_replicas):
               #copy_arr=copy_arr+['$SHARED/%s > iter0_input%s.pdb' % (Kconfig.md_input_file, idx)]
-              copy_out=copy_out+['%s/iter%s_out%s.pdb > %s/iter%s_input%s.pdb' % (combined_path, cur_iter, idx, combined_path, (cur_iter+1), idx)]
+          #    copy_out=copy_out+['%s/iter%s_out%s.pdb > %s/iter%s_input%s.pdb' % (combined_path, cur_iter, idx, combined_path, (cur_iter+1), idx)]
           
-          for idx in range(num_allocated_rep, num_allocated_rep+use_replicas):
-              #copy_arr=copy_arr+['$SHARED/%s > iter0_input%s.pdb' % (Kconfig.md_input_file, idx)]
-              copy_out=copy_out+['md.log > %s/md_logs/iter%s_md%s.log' % (combined_path, cur_iter, idx)] 
+         #for idx in range(num_allocated_rep, num_allocated_rep+use_replicas):
+         ##     #copy_arr=copy_arr+['$SHARED/%s > iter0_input%s.pdb' % (Kconfig.md_input_file, idx)]
+         #     copy_out=copy_out+['md.log > %s/md_logs/iter%s_md%s.log' % (combined_path, cur_iter, idx)] 
           
           sim_task.copy_output_data = copy_out  
             #if Kconfig.ndx_file is not None:

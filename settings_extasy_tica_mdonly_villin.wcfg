@@ -26,7 +26,7 @@ md_steps                = 10000000    #100000=2min
 md_dir                  = './files-villin/'
 md_input_file           = 'villin.pdb'        # Entire path to the MD Input file - Do not use $HOME or the likes
 md_reference            = 'villin-folded-ca.pdb'
-md_run_file             = 'run-openmm5.py' #-long.mdp'    #grompp.mdp   # Entire path to the MD Parameters file - Do not use $HOME or the likes
+md_run_file             = 'run-openmm6.py' #-long.mdp'    #grompp.mdp   # Entire path to the MD Parameters file - Do not use $HOME or the likes
 md_run_dir              = './helper_scripts/'
 md_use_xml              = 'yes'
 trajstride              = 10000
