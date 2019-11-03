@@ -46,7 +46,7 @@ def create_workflow(Kconfig,args):
       ana_settings=Kconfig.ana_env
     print("set", num_parallel,md_settings)
     iter_found=0
-    while os.path.isfile('%s/iter%s_input0.pdb' % (combined_path, iter_found)):
+    while len(glob.glob('%s/iter%s_input*.pdb' % (combined_path, iter_found)))>=num_replicas:
       iter_found+=1
     cur_iter=max(0,iter_found-1)
     print("cur_iter",cur_iter)
@@ -74,7 +74,7 @@ def create_workflow(Kconfig,args):
  
       # ------------------------------------------------------------------------------------------------------------------
     start_iter=cur_iter 
-    while(cur_iter <  int(Kconfig.num_iterations) and cur_iter<start_iter+1):
+    while(cur_iter <  int(Kconfig.num_iterations) and cur_iter<start_iter+4):
 
         # --------------------------------------------------------------------------------------------------------------
         # sim_stage:
