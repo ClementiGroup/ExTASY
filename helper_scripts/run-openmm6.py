@@ -125,9 +125,9 @@ print("found num:", str(len(glob.glob(args.path+'/iter'+str(args.iter)+'_input*.
 for rep in range(3):
  for i in range(args.idxstart,args.idxend):
   iter_found=0
-  while os.path.isfile('%s/iter%s_input%s.pdb' % (args.path, iter_found, i)):
+  while os.path.isfile('%s/iter%s_out%s.pdb' % (args.path, iter_found, i)):
       iter_found+=1
-  iter_found=max(0,iter_found-1)
+  #iter_found=max(0,iter_found)
   
   mdlog=args.path+'/md_logs/iter'+str(iter_found)+'_md'+str(i)+'.log'
   mdlog2=args.path+'/md_logs/iter'+str(iter_found)+'_md'+str(i)+'_2.log'
@@ -137,7 +137,8 @@ for rep in range(3):
   trajstride=args.trajstride
   todosteps=args.md_steps
   fileoutpdb=args.path+'/iter'+str(iter_found)+'_out'+str(i)+'.pdb'
-  fileextend=args.path+'/iter'+str(iter_found+1)+'_input'+str(i)+'.pdb'
+  oldoutpdb=args.path+'/iter'+str(iter_found-1)+'_out'+str(i)+'.pdb'
+  fileextend=args.path+'/iter'+str(iter_found)+'_input'+str(i)+'.pdb'
   argsrestart=args.path+'/iter'+str(iter_found)+'_restart'+str(i)+'.npz'
   savedcdfile=args.path+'/iter'+str(iter_found)+'_traj'+str(i)+'.dcd'
   savedcdfileextend=args.path+'/iter'+str(iter_found)+'_traj'+str(i)+'extend.dcd'
@@ -147,6 +148,10 @@ for rep in range(3):
   a_system_xml = 'system-5.xml'
   a_integrator_xml = 'integrator-5.xml'
   
+  if args.extend=='True':
+    shutil.copy2(oldoutpdb,fileextend)
+    print("extended", oldoutpdb, fileextend)
+
   platform, pdb, (system_xml, system), (integrator_xml, integrator) \
    = read_input(a_platform, a_topology_pdb, a_system_xml, a_integrator_xml)
   simulation = Simulation( pdb.topology,  system,integrator, platform, properties)
@@ -199,9 +204,10 @@ for rep in range(3):
     reporter=mdtraj.reporters.DCDReporter(savedcdfile, trajstride, atomSubset=prot_Select)
     # first frame adding
     reporter.report(simulation, state)
+    print("no restart")
 
   simulation.reporters.append(reporter)
-  
+  sys.stdout.flush() 
   start=datetime.now()
   while remainingsteps>0:
     #print(remainingsteps)
@@ -238,7 +244,8 @@ for rep in range(3):
   del simulation, integrator, system
   if args.extend=='True':
     shutil.copy2(fileoutpdb,fileextend)
-
+    print("copied to", fileextend)
+  sys.stdout.flush()
 
 
 
