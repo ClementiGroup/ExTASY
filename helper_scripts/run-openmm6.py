@@ -211,6 +211,7 @@ for rep in range(3):
     reporter.report(simulation, state)
     print("no restart")
 
+  torunsteps=remainingsteps
   simulation.reporters.append(reporter)
   sys.stdout.flush() 
   start=datetime.now()
@@ -226,7 +227,7 @@ for rep in range(3):
   end = datetime.now()
   elapsed = end -start
   time_el=elapsed.seconds + elapsed.microseconds*1e-6
-  print('Integrated %d steps in %g seconds' % (todosteps, time_el))
+  print('Integrated %d steps in %g seconds' % (torunsteps, time_el))
   print('%g ns/day' % (dt*todosteps*86400/time_el).value_in_unit(u.nanoseconds))
   
   #combine final extend to dcd traj

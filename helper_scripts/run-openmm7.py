@@ -156,8 +156,8 @@ for rep in range(3):
   argsrestart=args.path+'/iter'+str(iter_found)+'_restart'+str(i)+'.npz'
   savedcdfile=args.path+'/iter'+str(iter_found)+'_traj'+str(i)+'.dcd'
   savedcdfileextend=args.path+'/iter'+str(iter_found)+'_traj'+str(i)+'extend.dcd'
-  savedcdfileall=args.path+'/iter'+str(iter_found)+'_trajall'+str(i)+'.dcd'
-  savedcdfileextendall=args.path+'/iter'+str(iter_found)+'_trajall'+str(i)+'extend.dcd'
+  savedcdfileall=args.path+'/alltrajs/alltrajiter'+str(iter_found)+'_traj'+str(i)+'.dcd'
+  savedcdfileextendall=args.path+'/alltrajs/alltrajiter'+str(iter_found)+'_traj'+str(i)+'extend.dcd'
   a_topology_pdb = args.path+'/iter'+str(iter_found)+'_input'+str(i)+'.pdb' 
   a_platform = 'fastest'
   properties = None
@@ -241,7 +241,7 @@ for rep in range(3):
       reporter2=mdtraj.reporters.DCDReporter(savedcdfileall, trajstride)
       reporter2.report(simulation, state)
     print("no restart")
-
+  torunsteps=remainingsteps
   simulation.reporters.append(reporter)
   if saveall=='True':
     simulation.reporters.append(reporter2)
@@ -259,7 +259,7 @@ for rep in range(3):
   end = datetime.now()
   elapsed = end -start
   time_el=elapsed.seconds + elapsed.microseconds*1e-6
-  print('Integrated %d steps in %g seconds' % (todosteps, time_el))
+  print('Integrated %d steps in %g seconds' % (torunsteps, time_el))
   print('%g ns/day' % (dt*todosteps*86400/time_el).value_in_unit(u.nanoseconds))
   
   #combine final extend to dcd traj

@@ -162,7 +162,7 @@ def create_workflow(Kconfig,args):
           num_used_parallel= num_used_parallel+1
           sim_task_ref.append('$Pipeline_%s_Stage_%s_Task_%s' % (wf.uid, sim_stage.uid, sim_task.uid))
           sim_stage.add_tasks(sim_task)
-        for anatask in range(4):
+        for anatask in range(1):
           print("analysis task", anatask)
           ana_task = Task()
           ana_task.executable = ['python']
