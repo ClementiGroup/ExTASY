@@ -109,21 +109,30 @@ parser.add_argument('--idxend',dest='idxend',required=True,type=int)
 parser.add_argument('--iter',dest='iter',required=True,type=int)
 parser.add_argument('--path',dest='path',required=True,type=str)
 parser.add_argument("--Kconfig", type=str,dest="Kconfig",required=True)
-parser.add_argument("--extend", type=str, dest="extend", default='True')
-
+#parser.add_argument("--extend", type=str, dest="extend", default='True')
 args = parser.parse_args()
 Kconfig = imp.load_source('Kconfig', args.Kconfig)
 #grofile_name='start2.gro
-try:
-  strategy=str(Kconfig.strategy)
-except:
-  strategy='extend'
 
 time_start_all=time.time()
 #pdb=mdtraj.load(grofile_name)
 #save_traj=False
 #save_traj='True'
 os.makedirs(args.path+'/md_logs', exist_ok=True)
+try:
+  saveall=str(Kconfig.saveall)
+except:
+  saveall="False"
+try:
+  strategy=str(Kconfig.strategy)
+except:
+  strategy='extend'
+
+if saveall=='True':
+  os.makedirs(args.path+'/alltrajs', exist_ok=True)
+if strategy!='extend':
+  os.makedirs(args.path+'/restart', exist_ok=True)
+
 print("num of structures:",str(args.idxend-args.idxstart))
 print("found num:", str(len(glob.glob(args.path+'/iter'+str(args.iter)+'_input*.pdb')))) 
 for rep in range(3):
@@ -142,10 +151,13 @@ for rep in range(3):
   todosteps=args.md_steps
   fileoutpdb=args.path+'/iter'+str(iter_found)+'_out'+str(i)+'.pdb'
   oldoutpdb=args.path+'/iter'+str(iter_found-1)+'_out'+str(i)+'.pdb'
+  restartpdb=args.path+'/restart/restart'+str(i)+'.pdb'
   fileextend=args.path+'/iter'+str(iter_found)+'_input'+str(i)+'.pdb'
   argsrestart=args.path+'/iter'+str(iter_found)+'_restart'+str(i)+'.npz'
   savedcdfile=args.path+'/iter'+str(iter_found)+'_traj'+str(i)+'.dcd'
   savedcdfileextend=args.path+'/iter'+str(iter_found)+'_traj'+str(i)+'extend.dcd'
+  savedcdfileall=args.path+'/iter'+str(iter_found)+'_trajall'+str(i)+'.dcd'
+  savedcdfileextendall=args.path+'/iter'+str(iter_found)+'_trajall'+str(i)+'extend.dcd'
   a_topology_pdb = args.path+'/iter'+str(iter_found)+'_input'+str(i)+'.pdb' 
   a_platform = 'fastest'
   properties = None
@@ -156,6 +168,11 @@ for rep in range(3):
     if not os.path.isfile(fileextend):
       shutil.copy2(oldoutpdb,fileextend)
       print("extended", oldoutpdb, fileextend)
+
+  if strategy!='extend':
+    if not os.path.isfile(fileextend):
+      shutil.copy2(restartpdb,fileextend)
+      print("extended", restartpdb, fileextend)
 
   platform, pdb, (system_xml, system), (integrator_xml, integrator) \
    = read_input(a_platform, a_topology_pdb, a_system_xml, a_integrator_xml)
@@ -187,6 +204,8 @@ for rep in range(3):
   pbv = state.getPeriodicBoxVectors(asNumpy=True)
   allpdb=mdtraj.load(a_topology_pdb)
   protpdb=allpdb.atom_slice(prot_Select)
+  if not os.path.isfile(args.path+'/iter0_prot0.pdb'):
+    protpdb.save(args.path+'/iter0_prot0.pdb')
   if os.path.isfile(savedcdfileextend):
     print('combine previous extend with dcd')  
     dcd1=mdtraj.load(savedcdfile,top=protpdb)
@@ -194,6 +213,12 @@ for rep in range(3):
     dcd3=mdtraj.join([dcd1,dcd2])
     dcd3.save(savedcdfile)
     os.remove(savedcdfileextend)
+    if saveall=="True":
+      dcd1=mdtraj.load(savedcdfileall,top=allpdb)
+      dcd2=mdtraj.load(savedcdfileextendall,top=allpdb)
+      dcd3=mdtraj.join([dcd1,dcd2])
+      dcd3.save(savedcdfileall)
+      os.remove(savedcdfileextendall)
 
   if os.path.isfile(argsrestart):
     arr = np.load(argsrestart)
@@ -203,15 +228,23 @@ for rep in range(3):
     remainingsteps=arr['remainingsteps']
     print('restart remaining', remainingsteps)
     savedcdfile=savedcdfileextend
-    reporter=mdtraj.reporters.DCDReporter(savedcdfile, trajstride, atomSubset=prot_Select)       
+    reporter=mdtraj.reporters.DCDReporter(savedcdfile, trajstride, atomSubset=prot_Select)
+    if saveall=='True':
+      savedcdfileall=savedcdfileextendall
+      reporter2=mdtraj.reporters.DCDReporter(savedcdfileall, trajstride)
   else:
     remainingsteps=todosteps
     reporter=mdtraj.reporters.DCDReporter(savedcdfile, trajstride, atomSubset=prot_Select)
     # first frame adding
     reporter.report(simulation, state)
+    if saveall=='True':
+      reporter2=mdtraj.reporters.DCDReporter(savedcdfileall, trajstride)
+      reporter2.report(simulation, state)
     print("no restart")
 
   simulation.reporters.append(reporter)
+  if saveall=='True':
+    simulation.reporters.append(reporter2)
   sys.stdout.flush() 
   start=datetime.now()
   while remainingsteps>0:
@@ -237,6 +270,14 @@ for rep in range(3):
     dcd3=mdtraj.join([dcd1,dcd2])
     dcd3.save(savedcdfile)
     os.remove(savedcdfileextend)
+    if saveall=='True':
+      print('final combine extend with all dcd')
+      dcd1=mdtraj.load(savedcdfileall,top=allpdb)
+      dcd2=mdtraj.load(savedcdfileextendall,top=allpdb)
+      dcd3=mdtraj.join([dcd1,dcd2])
+      dcd3.save(savedcdfileall)
+      os.remove(savedcdfileextendall)
+
 
 
 

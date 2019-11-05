@@ -162,70 +162,28 @@ def create_workflow(Kconfig,args):
           num_used_parallel= num_used_parallel+1
           sim_task_ref.append('$Pipeline_%s_Stage_%s_Task_%s' % (wf.uid, sim_stage.uid, sim_task.uid))
           sim_stage.add_tasks(sim_task)
-
-        wf.add_stages(sim_stage)
-        # --------------------------------------------------------------------------------------------------------------
-
-        # --------------------------------------------------------------------------------------------------------------
-        # pre_ana_task:
-        #     Purpose:   The output of each gromacs instance in the simulaxftion stage is a small coordinate file.
-        #                 Concatenate such files from each of the gromacs instances to form a larger file.
-        #     Arguments:
-        #             numCUs = number of simulation instances / number of small files to be concatenated
-        if str(Kconfig.strategy)!='extend':
-          ana_stage = Stage()
+        for anatask in range(4):
+          print("analysis task", anatask)
           ana_task = Task()
-          ana_task.pre_exec = ana_settings+ ['export tasks=tica_msm_ana', 'export iter=%s' % cur_iter ]
           ana_task.executable = ['python']
-          ana_task.arguments = [script_ana, '--path',combined_path,'--n_select', str(num_replicas),'--cur_iter',str(cur_iter), '--Kconfig', str(args.Kconfig), '--ref', str(Kconfig.md_reference), '>', 'analyse.log']
-
-          ana_task.cpu_reqs = { 'processes': 1,
-                                    'process_type': 'MPI',
-                                    'threads_per_process': 16,
-                                    'thread_type': None
-                                  }
-
+          pre_exec_arr = ana_settings
+          ana_task.pre_exec = pre_exec_arr
           ana_task.link_input_data = ['$SHARED/%s > %s'%(script_ana, script_ana), '$SHARED/%s > %s'%(args.Kconfig,args.Kconfig)]
-          
-          #for sim_num in range(min(int(Kconfig.num_parallel_MD_sim),int(Kconfig.num_replicas))):
-          ana_task.copy_output_data = ['analyse.log > %s/iter%s_analyse.log' % (combined_path, cur_iter)]
-
-          #ana_task.copy_output_data = ['tmpha.gro > %s/iter_%s/tmpha.gro' % (combined_path,cur_iter),
-           #                              'tmp.gro > %s/iter_%s/tmp.gro' % (combined_path,cur_iter)]
-                                         #'tmp.gro > resource://iter_%s/tmp.gro' % cur_iter
-
-          ana_task_ref = '$Pipeline_%s_Stage_%s_Task_%s'%(wf.uid, ana_stage.uid, ana_task.uid)
-          ana_stage.add_tasks(ana_task)
-          wf.add_stages(ana_stage)
-        # --------------------------------------------------------------------------------------------------------------
-
-        # --------------------------------------------------------------------------------------------------------------
-        # lsdmap:
-        #     Purpose: Perform LSDMap on the large coordinate file to generate weights and eigen values.
-        #     Arguments:
-        #             config = name of the config file to be used during LSDMap
-          
-          #if(cur_iter % Kconfig.nsave == 0):
-          #     post_ana_task.download_output_data = ['out.gro > output/iter_%s/out.gro' % cur_iter,
-          #                                   'weight_out.w > output/iter_%s/weight_out.w' % cur_iter,
-          #                                   'plot-scatter-cluster-10d.png > output/iter_%s/plot-scatter-cluster-10d.png' % (cur_iter),
-          #                                   'ncopies.nc > output/iter_%s/ncopies.nc' % (cur_iter),
-          #                                   '%s/iter_%s/tmp.gro > output/iter_%s/tmp.gro' % (combined_path,cur_iter,cur_iter) 
-          #                                   ]
-
-          #post_ana_task.copy_output_data = ['ncopies.nc > %s/iter_%s/ncopies.nc' % (combined_path,cur_iter),
-          #                           'weight_out.w > %s/iter_%s/weight_out.w' % (combined_path,cur_iter),
-          #                           'out.gro > %s/iter_%s/out.gro' % (combined_path,cur_iter),
-          #                           'plot-scatter-cluster-10d.png > %s/iter_%s/plot-scatter-cluster-10d.png' % (combined_path,cur_iter),
-          #                           'plot-scatter-cluster-10d-counts.png > %s/iter_%s/plot-scatter-cluster-10d-counts.png' % (combined_path,cur_iter),
-          #                           'plot-scatter-cluster-10d-ncopiess.png > %s/iter_%s/plot-scatter-cluster-10d-ncopiess.png' % (combined_path,cur_iter)]
-
-          #post_ana_task_ref = '$Pipeline_%s_Stage_%s_Task_%s'%(wf.uid, post_ana_stage.uid, post_ana_task.uid)
-
-          #post_ana_stage.add_tasks(post_ana_task)
-          #wf.add_stages(post_ana_stage)
-        # --------------------------------------------------------------------------------------------------------------
-
+          ana_task.gpu_reqs = { 'processes': 1,
+                                    'process_type': None,
+                                    'threads_per_process': 1,
+                                    'thread_type': 'CUDA'
+                                }
+          ana_task.cpu_reqs = { 'processes': 1, 
+                                    'process_type': None, 
+                                    'threads_per_process': 20, 
+                                    'thread_type': 'OpenMP'
+                                  }
+          ana_task.arguments = [script_ana,'--Kconfig', str(args.Kconfig), '>', "analysis.log"]
+          ana_task.copy_output_data = ['analysis.log > %s/analysis_iter%s_r%s.log' % (combined_path, cur_iter, anatask)]
+          ana_task_ref = '$Pipeline_%s_Stage_%s_Task_%s'%(wf.uid, sim_stage.uid, ana_task.uid)
+          sim_stage.add_tasks(ana_task) 
+        wf.add_stages(sim_stage)
         cur_iter += 1
         Kconfig.start_iter=str(cur_iter)
 
@@ -240,7 +198,6 @@ if __name__ == '__main__':
 
         parser = argparse.ArgumentParser()
         parser.add_argument('--Kconfig', help='link to Kernel configurations file')
-        #parser.add_argument('--port', dest="port", help='port for RabbitMQ server', default=5672, type=int)
         args = parser.parse_args()
         
         if args.Kconfig is None:
