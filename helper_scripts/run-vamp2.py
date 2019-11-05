@@ -139,6 +139,7 @@ while True:
   allCA = feat.select('name CA')
   ca_pairs=feat.pairs(allCA, excluded_neighbors=2)
   data=[]
+  traj_fns2=[]
   for idx in range(len(traj_fns)):
     try:
       if idx%10==0:
@@ -148,6 +149,7 @@ while True:
       box=traj.unitcell_vectors#[0]
       orthogonal = np.allclose(traj.unitcell_angles, 90)
       data.append(_distance_box_fast(traj.xyz, ca_pairs,box))
+      traj_fns2.append(traj_fns[idx])
     except:
       print("failed load",traj_fns[idx])
   data[0].max()
@@ -327,7 +329,7 @@ while True:
                 for state in state_picks
                 ]
     print("picks",picks)
-    traj_select = [traj_fns[pick[0]] for pick in picks]
+    traj_select = [traj_fns2[pick[0]] for pick in picks]
     traj_select_all=[trajprotdir+'alltrajs/alltraj'+t[len(trajprotdir):] for t in traj_select]
     frame_select = [pick[1]*vamp_stride*msm_stride for pick in picks]
     print("all",traj_select_all)
@@ -336,16 +338,19 @@ while True:
     print("writing")
     for idx in range(n_pick):
       try:
-        print(idx, end=' ')
         sys.stdout.flush()
         tmp=mdtraj.load(topfileall)
-        file = mdtraj.load(traj_select_all[idx], top=topfileall)
-        tmp.xyz[0,:,:]=file.xyz[frame_select[idx],:,:]
-        tmp.save_pdb(trajprotdir+'/restart/restart'+str(idx)+'.pdb')
-        del tmp
+        if os.path.isfile(traj_select_all[idx]):
+          file = mdtraj.load(traj_select_all[idx], top=topfileall)
+          tmp.xyz[0,:,:]=file.xyz[frame_select[idx],:,:]
+          tmp.save_pdb(trajprotdir+'/restart/restart'+str(idx)+'.pdb')
+          del tmp
+          print(idx, end=' ')
+        else:
+          print(idx, "-missing", traj_select_all[idx])
       except:
-        print("fail write", idx)
+        print(idx, "-fail write")
     print(" ")
     print("time4", time.time()-time_start)
     sys.stdout.flush()
-  sleep(randint(10,100))
+  sleep(10)
