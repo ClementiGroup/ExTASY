@@ -260,7 +260,7 @@ for rep in range(3):
   elapsed = end -start
   time_el=elapsed.seconds + elapsed.microseconds*1e-6
   print('Integrated %d steps in %g seconds' % (torunsteps, time_el))
-  print('%g ns/day' % (dt*todosteps*86400/time_el).value_in_unit(u.nanoseconds))
+  print('%g ns/day' % (dt*torunsteps*86400/time_el).value_in_unit(u.nanoseconds))
   
   #combine final extend to dcd traj
   if os.path.isfile(savedcdfileextend):

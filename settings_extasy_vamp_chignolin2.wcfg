@@ -15,7 +15,7 @@ CPUs_per_NODE           = 22                   # each replica uses that many Cus
 num_iterations          = 100                    # Number of iterations of Simulation-Analysis
 start_iter              = 0                    # Iteration number with which to start
 nsave                   = 1                    # number of iterations after which output is transfered to local machine
-remote_output_directory = '/gpfs/alpine/proj-shared/bip191/extasy_vamp_chignolin/'   
+remote_output_directory = '/gpfs/alpine/proj-shared/bip191/extasy_vamp_chignolin2/'   
 
 #--------------------------Simulation--------------------------------
 system                  = 'CLN025'
@@ -39,7 +39,7 @@ strategy                = 'cmacro'
 
 #--------------------------Stretegy-settings----------------------------------
 helper_scripts          = './helper_scripts'
-script_ana              = 'run-vamp2.py'
+script_ana              = 'run-vamp3.py'
 
 reweight                 = 'no'
 
@@ -47,7 +47,7 @@ select_n_macro_type     = 'const'
 num_macrostates         = 10
 select_micro_within_macro_type    = 'sto_inv_linear'
 macrosstate_method      = 'kmeans'
-vamp_lag                = 20
+vamp_lag                = 30
 vamp_dim                = 10
 vamp_stride             = 1
 kmeans_stride           = 100
