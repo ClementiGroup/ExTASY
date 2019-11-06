@@ -133,6 +133,7 @@ project_tica='True'
 refticapath='/gpfs/alpine/proj-shared/bip191/objchigtica1-tica.obj'
 
 while True:
+ try:
   iter_found=0
   while os.path.isfile('%s/iter%s_out0.pdb' % (trajprotdir, iter_found)):
         iter_found+=1
@@ -233,10 +234,10 @@ while True:
       figX.savefig(resultspath+name_data+"ticafe_i"+str(iter_found)+".png")
   print("time1.1", time.time()-time_start)
   try:
-    km = pyemma.coordinates.cluster_kmeans(slow_modes, k = msm_states,max_iter=20,stride=kmeans_stride)
+    km = pyemma.coordinates.cluster_kmeans(slow_modes, k = msm_states,max_iter=50,stride=kmeans_stride)
   except:
     #if not enough states
-    km = pyemma.coordinates.cluster_kmeans(slow_modes, k = min(msm_states, 100),max_iter=20) 
+    km = pyemma.coordinates.cluster_kmeans(slow_modes, k = min(msm_states, 100),max_iter=50) 
   dtrajs = km.dtrajs
   if lengthsall<msm_lag:
     print("traj not long enough")
@@ -339,7 +340,7 @@ while True:
     print("reweight", np.concatenate(msm.trajectory_weights()).min(),np.concatenate(msm.trajectory_weights()).max())
     macrostate_assignment_of_visited_microstates=all_assign.astype('int')
     macrostate_counts = np.array([np.sum(s[states_unique][macrostate_assignment_of_visited_microstates == macrostate_label]) for macrostate_label in range(macrostate_assignment_of_visited_microstates.max()+1)])
-    macrostate_counts[largest_assign.max()+1:]+=macrostate_counts[:largest_assign.max()+1].min()+1
+    macrostate_counts[num_macrostates:]+=macrostate_counts[:num_macrostates].min()+1
     selected_macrostate = sorted(select_restart_state(macrostate_counts[macrostate_counts > 0], 'sto_inv_linear', np.arange(macrostate_counts.shape[0])[macrostate_counts > 0], nparallel=n_pick))
     print("macrostate_counts", macrostate_counts)
     print("inv macrostate_counts", 1./macrostate_counts)
@@ -446,4 +447,8 @@ while True:
     sys.stdout.flush()
     plt.close('all') 
   sleep(10)
-
+ except Exception as e:
+    print(type(e).__name__) # returns the name of the exception
+    print(e.__doc__)
+    print(e)
+    sleep(10)
