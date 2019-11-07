@@ -118,11 +118,12 @@ def create_workflow(Kconfig,args):
                                     'threads_per_process': 20, 
                                     'thread_type': 'OpenMP'
                                   }
-          sim_task.arguments = ['run_openmm.py',
-                                  '--trajstride', str(Kconfig.trajstride),'--Kconfig', str(args.Kconfig), 
-                                  '--idxstart',str(num_allocated_rep), '--idxend',str((num_allocated_rep+use_replicas)),
-                                  '--path',combined_path,'--iter',str(cur_iter),
-                                  '--md_steps',str(Kconfig.md_steps), '--save_traj', 'True','>', 'md.log']
+          sim_task.arguments = ['run_openmm.py','--Kconfig', str(args.Kconfig), '--idxstart',str(num_allocated_rep), '--idxend',str(num_allocated_rep+use_replicas),
+                                  '--path',combined_path,'>', 'md.log']
+                                  #'--trajstride', str(Kconfig.trajstride),'--Kconfig', str(args.Kconfig), 
+                                  #'--idxstart',str(num_allocated_rep), '--idxend',str((num_allocated_rep+use_replicas)),
+                                  #'--path',combined_path,'--iter',str(cur_iter),
+                                  #'--md_steps',str(Kconfig.md_steps), '--save_traj', 'True','>', 'md.log']
           if Kconfig.md_use_xml=='yes':
             link_arr=['$SHARED/%s > run_openmm.py' % (os.path.basename(Kconfig.md_run_file)),
                       '$SHARED/system-5.xml > system-5.xml',
@@ -162,7 +163,8 @@ def create_workflow(Kconfig,args):
           num_used_parallel= num_used_parallel+1
           sim_task_ref.append('$Pipeline_%s_Stage_%s_Task_%s' % (wf.uid, sim_stage.uid, sim_task.uid))
           sim_stage.add_tasks(sim_task)
-        for anatask in range(1):
+        if str(Kconfig.strategy)!='extend':
+         for anatask in range(1):
           print("analysis task", anatask)
           ana_task = Task()
           ana_task.executable = ['python']

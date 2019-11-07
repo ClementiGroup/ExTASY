@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-__author__ = 'Vivek <vivek.balasubramanian@rutgers.edu> Eugen <eh22@rice.edu>'
-__copyright__ = 'Copyright 2018, http://radical.rutgers.edu,  http://clementiresearch.rice.edu'
+__author__ = 'eh22@rice.edu'
+__copyright__ = 'Copyright 2019, http://radical.rutgers.edu,  http://clementiresearch.rice.edu'
 __license__ = 'MIT'
-__use_case_name__ = 'Gromacs + LSDMap simulation-analysis using EnTK'
+__use_case_name__ = 'ExTASY using EnTK'
 
 
 from radical.entk import Pipeline, Stage, Task, AppManager
@@ -122,7 +122,7 @@ def create_workflow(Kconfig,args):
                                   '--trajstride', str(Kconfig.trajstride),'--Kconfig', str(args.Kconfig), 
                                   '--idxstart',str(num_allocated_rep), '--idxend',str((num_allocated_rep+use_replicas)),
                                   '--path',combined_path,'--iter',str(cur_iter),
-                                  '--md_steps',str(Kconfig.md_steps), '--save_traj', 'True','>', 'md.log']
+                                  '--md_steps',str(Kconfig.md_steps), '--save_traj', str(Kconfig.save_alltraj),'>', 'md.log']
           if Kconfig.md_use_xml=='yes':
             link_arr=['$SHARED/%s > run_openmm.py' % (os.path.basename(Kconfig.md_run_file)),
                       '$SHARED/system-5.xml > system-5.xml',

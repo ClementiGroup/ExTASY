@@ -11,6 +11,7 @@ from matplotlib import pyplot as plt
 import glob
 import mdtraj
 import imp
+import collections
 from pyemma import plots
 matplotlib.rcParams.update({'font.size': 14})
 print("pyemma version",pyemma.__version__)
@@ -29,7 +30,11 @@ from hde import HDE, analysis
 print(tf.__version__)
 from random import randint
 from time import sleep
-
+plt.rcParams.update({'font.size': 14})
+plt.rc('text', usetex=False)
+plt.rcParams.update({'figure.dpi': 300})
+plt.rcParams['text.usetex'] = False
+plt.rcParams["figure.figsize"] = [6.4, 4.8]
 
 def select_restart_state(values, select_type, microstates, nparallel=1, parameters=None):
     if select_type == 'rand':
@@ -95,6 +100,7 @@ args = parser.parse_args()
 Kconfig = imp.load_source('Kconfig', args.Kconfig)
 
 #Kconfig = imp.load_source('Kconfig', 'settings_extasy_vamp_chignolin.wcfg')
+
 print("strategy", Kconfig.strategy)
 
 
@@ -113,15 +119,25 @@ vamp_stride=Kconfig.vamp_stride
 kmeans_stride =Kconfig.kmeans_stride
 msm_states =Kconfig.msm_states
 msm_lag=Kconfig.msm_lag
-msm_stride=1
 n_pick=Kconfig.num_replicas
+try:
+  select_micro_within_macro_type = Kconfig.select_micro_within_macro_type
+except:
+  select_micro_within_macro_type='sto_inv_linear'
+try:
+  macrostate_method=Kconfig.macrostate_method
+except:
+  macrostate_method='kmeans'
 
+project_tica='True'
+refticapath='/gpfs/alpine/proj-shared/bip191/objchigtica1-tica.obj'
 
 while True:
+ try:
   iter_found=0
   while os.path.isfile('%s/iter%s_out0.pdb' % (trajprotdir, iter_found)):
         iter_found+=1
-  iter_found=max(0,iter_found-1)
+  #iter_found=max(0,iter_found-1)
   mdlog=trajprotdir+'md_logs/analysisiter'+str(iter_found)+'.log'
   sys.stdout = open(mdlog,'a')
   time_start=time.time()
@@ -156,16 +172,23 @@ while True:
   scaler = pre.MinMaxScaler(feature_range=(-1, 1))
   scaler.fit(data[0])
   data2 = [scaler.transform(d) for d in data]
-  data2[1].max()
+  print("\n",data2[1].max())
   print(len(data2))
   nfeat = len(feat.describe())
   print(nfeat)
+  lengthsall=max([data22.shape[0] for data22 in data2])
+  print("lengthsmax",lengthsall)
+  if lengthsall<vamp_lag:
+    print("trajs not long enough")
+    sys.stdout.flush()
+    sleep(10)
+    continue
   model = HDE(
       len(ca_pairs), 
       n_components=4, 
       n_epochs=10, 
       learning_rate=1e-4,
-      lag_time=30,
+      lag_time=vamp_lag,
       batch_normalization=False,
       reversible=True,
       hidden_layer_depth=6,
@@ -184,14 +207,47 @@ while True:
   yall_slow_modes = np.concatenate(slow_modes)
   yall=yall_slow_modes
   yall_slow_modes.shape
-  figX, axX = pyemma.plots.plot_free_energy(yall_slow_modes[:,0], yall_slow_modes[:,1])
-  figX.savefig(resultspath+name_data+"vampfe-lag30-m2_i"+str(iter_found)+".pdf")
-  km = pyemma.coordinates.cluster_kmeans(slow_modes, k = msm_states,max_iter=20,stride=kmeans_stride)
+  figX, axX,mi = pyemma.plots.plot_free_energy(yall_slow_modes[:,0], yall_slow_modes[:,1],legacy=False)
+  axX.set_xlabel('TICA 0')
+  axX.set_ylabel('TICA 1')
+  figX.savefig(resultspath+name_data+"vampfe_i"+str(iter_found)+".png")
+  if project_tica=='True':
+    tica_obj = pyemma.load(refticapath)
+    yticaproj=np.concatenate(tica_obj.transform(data))
+    xlim=(-2.2,1.7)
+    ylim=(-2.5,3.4)
+    vmax_set=10
+    step=0.1
+    levels=np.arange(0,vmax_set+step,step)
+    figX, axX,mi = pyemma.plots.plot_free_energy(yticaproj[:,0], yticaproj[:,1], levels=levels,legacy=False)
+    axX.set_xlim(xlim)
+    axX.set_ylim(ylim)
+    axX.set_xlabel('TICA 0')
+    axX.set_ylabel('TICA 1')
+    figX.savefig(resultspath+name_data+"ticaprojreffe_i"+str(iter_found)+".png")
+    if lengthsall>vamp_lag:
+      tica_obj = pyemma.coordinates.tica(data,lag=vamp_lag, dim=4, kinetic_map = True, commute_map=False)
+      yticaproj=np.concatenate(tica_obj.transform(data)) 
+      figX, axX,mi = pyemma.plots.plot_free_energy(yticaproj[:,0], yticaproj[:,1],legacy=False)
+      axX.set_xlabel('TICA 0')
+      axX.set_ylabel('TICA 1')
+      figX.savefig(resultspath+name_data+"ticafe_i"+str(iter_found)+".png")
+  print("time1.1", time.time()-time_start)
+  try:
+    km = pyemma.coordinates.cluster_kmeans(slow_modes, k = msm_states,max_iter=50,stride=kmeans_stride)
+  except:
+    #if not enough states
+    km = pyemma.coordinates.cluster_kmeans(slow_modes, k = min(msm_states, 100),max_iter=50) 
   dtrajs = km.dtrajs
+  if lengthsall<msm_lag:
+    print("traj not long enough")
+    sys.stdout.flush()
+    sleep(10)
+    continue
   msm=pyemma.msm.estimate_markov_model(dtrajs, lag=msm_lag)
   print("msm timescales", msm.timescales(10))
   c=msm.count_matrix_full
-  s =  np.sum(c, axis=1)
+  s =  np.sum(c+c.T, axis=1)
   q = 1.0 / s
   q[s<1]=1.0
   n_states=c.shape[0]
@@ -213,14 +269,14 @@ while True:
     state_picks=sorted(state_picks.astype('int'))
     print("state_picks", state_picks)
     fig,ax = plt.subplots(nrows=1, figsize=(7,4.5), sharex=True)
-    pyemma.plots.plot_free_energy(yall[:,0],yall[:,1], nbins=64, weights=np.concatenate(msm.trajectory_weights()), cmap='viridis', ax=ax)
+    pyemma.plots.plot_free_energy(yall[:,0],yall[:,1], nbins=64, weights=np.concatenate(msm.trajectory_weights()), cmap='nipy_spectral', ax=ax,legacy=False)
     ax.set_xlabel("TIC 1")
     ax.set_ylabel("TIC 2")
     ax.scatter(km.cluster_centers_[:,0], km.cluster_centers_[:,1], c= 'gray', s=2, lw=0.5, edgecolor="k", label=f"states")
     ax.scatter(km.cluster_centers_[state_picks,0], km.cluster_centers_[state_picks,1], c='red',s=25, lw=0.5, edgecolor="k", label=f"cmicro")
     ax.legend( fontsize=8)#loc=5
     fig.tight_layout()
-    plt.savefig(resultspath+name_data+"cmicro_state_picks_i"+str(iter_found)+".pdf")
+    plt.savefig(resultspath+name_data+"cmicro_state_picks_i"+str(iter_found)+".png")
   if Kconfig.strategy=='cmacro':
     num_eigenvecs_to_compute = 10
     microstate_transitions_used=c
@@ -254,44 +310,68 @@ while True:
                 all_connect=np.where(np.in1d(states_unique, states_largest))[0]
                 print("worked timescales",current_timescales[:10])
                 print("not_connected states",not_connect)
+                print("s not connected", s[not_connect])
     projected_microstate_coords_scaled = sklearn.preprocessing.MinMaxScaler(feature_range=(-1, 1)).fit_transform(current_eigenvecs[:,1:])
     projected_microstate_coords_scaled *= np.sqrt(current_timescales[:num_eigenvecs_to_compute-1] / current_timescales[0]).reshape(1, num_eigenvecs_to_compute-1)
     num_macrostates = min(num_macrostates,num_visited_microstates)
-    pcca=msm.pcca(num_macrostates)
-    macrostate_assignments = { k:v for k,v in enumerate(msm.metastable_sets) }
-    largest_assign = msm.metastable_assignments
-    print("macrostate assignments", macrostate_assignments)
-    print("mismatch", "largest_assign", largest_assign.shape, "num_visited_microstates", num_visited_microstates) 
-    #all_assign=largest_assign
-    all_assign=np.zeros(num_visited_microstates)
-    all_assign[all_connect]=largest_assign
-    all_assign[not_connect]=np.arange(not_connect.shape[0])+largest_assign.max()+1
-    prob_pcca=[msm.stationary_distribution[pcca.metastable_assignment==i].sum() \
-                                  for i in range(num_macrostates)]
-    print("prob_pcca",prob_pcca )
+    if macrostate_method=='pcca':
+      pcca=msm.pcca(num_macrostates)
+      macrostate_assignments = { k:v for k,v in enumerate(msm.metastable_sets) }
+      largest_assign = msm.metastable_assignments
+      print("macrostate assignments", macrostate_assignments)
+      print("mismatch", "largest_assign", largest_assign.shape, "num_visited_microstates", num_visited_microstates) 
+      #all_assign=largest_assign
+      all_assign=np.zeros(num_visited_microstates)
+      all_assign[all_connect]=largest_assign
+      all_assign[not_connect]=np.arange(not_connect.shape[0])+largest_assign.max()+1
+      prob_pcca=[msm.stationary_distribution[pcca.metastable_assignment==i].sum() \
+                                    for i in range(num_macrostates)]
+      print("prob_pcca",prob_pcca )
+    else:
+      #kmeans
+      kmeans_obj = pyemma.coordinates.cluster_kmeans(data=projected_microstate_coords_scaled, k=num_macrostates, max_iter=10)
+      largest_assign=kmeans_obj.assign()[0]
+      print('time macrostate kmeans finished', str(time.time()-time_start))
+      all_assign=np.zeros(num_visited_microstates)
+      all_assign[all_connect]=largest_assign
+      all_assign[not_connect]=np.arange(not_connect.shape[0])+largest_assign.max()+1
+    col=collections.Counter(all_assign)
+    print("all assign counts", [col[k] for k in sorted(list(col))])
     print("reweight", np.concatenate(msm.trajectory_weights()).min(),np.concatenate(msm.trajectory_weights()).max())
     macrostate_assignment_of_visited_microstates=all_assign.astype('int')
     macrostate_counts = np.array([np.sum(s[states_unique][macrostate_assignment_of_visited_microstates == macrostate_label]) for macrostate_label in range(macrostate_assignment_of_visited_microstates.max()+1)])
-    selected_macrostate = select_restart_state(macrostate_counts[macrostate_counts > 0], 'sto_inv_linear', np.arange(macrostate_counts.shape[0])[macrostate_counts > 0], nparallel=n_pick)
+    macrostate_counts[num_macrostates:]+=macrostate_counts[:num_macrostates].min()+1
+    selected_macrostate = sorted(select_restart_state(macrostate_counts[macrostate_counts > 0], 'sto_inv_linear', np.arange(macrostate_counts.shape[0])[macrostate_counts > 0], nparallel=n_pick))
     print("macrostate_counts", macrostate_counts)
+    print("inv macrostate_counts", 1./macrostate_counts)
     print("selected_macrostate", selected_macrostate)
     fig,ax = plt.subplots(nrows=1, figsize=(7,4.5), sharex=True)
-    pyemma.plots.plot_free_energy(yall[:,0],yall[:,1], nbins=64, weights=np.concatenate(msm.trajectory_weights()), cmap='viridis', ax=ax)
+    plt.scatter(projected_microstate_coords_scaled[:,0],projected_microstate_coords_scaled[:,1], c=largest_assign,cmap='nipy_spectral')
+    plt.xlabel("MSM ev 1")
+    plt.ylabel("MSM ev 2")
+    fig.tight_layout()
+    plt.savefig(resultspath+name_data+"msmevspace_i"+str(iter_found)+".png")
+    fig,ax = plt.subplots(nrows=1, figsize=(7,4.5), sharex=True)
+    pyemma.plots.plot_free_energy(yall[:,0],yall[:,1], nbins=64, weights=np.concatenate(msm.trajectory_weights()), cmap='nipy_spectral', ax=ax,legacy=False)
     ax.set_xlabel("TIC 1")
     ax.set_ylabel("TIC 2")
-    for i in range(pcca.n_metastable):
-        ax.scatter(km.cluster_centers_[macrostate_assignment_of_visited_microstates==i,0], 
+    for i in range(num_macrostates):
+      ax.scatter(km.cluster_centers_[macrostate_assignment_of_visited_microstates==i,0], 
                       km.cluster_centers_[macrostate_assignment_of_visited_microstates==i,1], 
                       c=f"C{(1+i)}", s=25, lw=0.5, edgecolor="k", label=f"C{(1+i)}")
+    for i in range(num_macrostates,len(macrostate_counts)):
+      ax.scatter(km.cluster_centers_[macrostate_assignment_of_visited_microstates==i,0], 
+                  km.cluster_centers_[macrostate_assignment_of_visited_microstates==i,1], 
+                  c="black", s=70, lw=0.5, edgecolor="k")
     ax.legend( fontsize=8)
     fig.tight_layout()
-    plt.savefig(resultspath+name_data+"macrostates_i"+str(iter_found)+".pdf")
-    select_micro_within_macro_type='rand'
+    plt.savefig(resultspath+name_data+"macrostates_i"+str(iter_found)+".png")
     restart_state=np.empty((0))
     for i in range(n_pick):
         selected_macrostate_mask = (macrostate_assignment_of_visited_microstates == selected_macrostate[i])
         #print(selected_macrostate, microstate_transitions_used[visited_microstates], macrostate_counts, counts[states_unique][selected_macrostate])
-        counts_in_selected_macrostate = s[states_unique][selected_macrostate_mask]
+        counts_in_selected_macrostate = s[states_unique][selected_macrostate_mask]+1
+        print(i,counts_in_selected_macrostate,visited_microstates[selected_macrostate_mask])
         #print(parameters['select_micro_within_macro_type'])
         if select_micro_within_macro_type == 'sto_inv_linear':
             # within a macrostate, select a microstate based on count
@@ -304,7 +384,7 @@ while True:
     print("state_picks",state_picks)
     print("no exceptions")
     fig,ax = plt.subplots(nrows=1, figsize=(7,4.5), sharex=True)
-    pyemma.plots.plot_free_energy(yall[:,0],yall[:,1], nbins=64, weights=np.concatenate(msm.trajectory_weights()), cmap='viridis', ax=ax)#,cax=ax)
+    pyemma.plots.plot_free_energy(yall[:,0],yall[:,1], nbins=64, weights=np.concatenate(msm.trajectory_weights()), cmap='nipy_spectral', ax=ax,legacy=False)#,cax=ax)
     ax.set_xlabel("TIC 1")
     ax.set_ylabel("TIC 2")
     ax.scatter(km.cluster_centers_[:,0], km.cluster_centers_[:,1], c= 'gray', s=2, lw=0.5, edgecolor="k", label=f"states")
@@ -313,16 +393,28 @@ while True:
     #ax[1].set_ylabel("TIC 3")
     ax.legend( fontsize=8)#loc=5
     fig.tight_layout()
-    plt.savefig(resultspath+name_data+"cmacro_state_picks_i"+str(iter_found)+".pdf")
+    plt.savefig(resultspath+name_data+"cmacro_state_picks_i"+str(iter_found)+".png")
     fig,ax = plt.subplots(nrows=1, figsize=(7,4.5), sharex=True)
-    pyemma.plots.plot_free_energy(yall[:,0],yall[:,2], nbins=64, weights=np.concatenate(msm.trajectory_weights()), cmap='viridis', ax=ax)#,cax=ax)
+    pyemma.plots.plot_free_energy(yall[:,0],yall[:,2], nbins=64, weights=np.concatenate(msm.trajectory_weights()), cmap='nipy_spectral', ax=ax,legacy=False)#,cax=ax)
     ax.set_xlabel("TIC 1")
     ax.set_ylabel("TIC 3")
     ax.scatter(km.cluster_centers_[:,0], km.cluster_centers_[:,2], c= 'gray', s=2, lw=0.5, edgecolor="k", label=f"states")
     ax.scatter(km.cluster_centers_[state_picks,0], km.cluster_centers_[state_picks,2], c='red',s=25, lw=0.5, edgecolor="k", label=f"cmacro")
     ax.legend( fontsize=8)#loc=5
     fig.tight_layout()
-    plt.savefig(resultspath+name_data+"cmacro_state_picks2_i"+str(iter_found)+".pdf")
+    plt.savefig(resultspath+name_data+"cmacro_state_picks2_i"+str(iter_found)+".png")
+    fig,ax = plt.subplots(nrows=1, figsize=(7,4.5), sharex=True)
+    pyemma.plots.plot_free_energy(yall[:,0],yall[:,1], nbins=64, weights=np.concatenate(msm.trajectory_weights()), cmap='nipy_spectral', ax=ax,legacy=False)
+    ax.set_xlabel("TIC 1")
+    ax.set_ylabel("TIC 2")
+    for i in np.unique(selected_macrostate):
+        ax.scatter(km.cluster_centers_[macrostate_assignment_of_visited_microstates==i,0], 
+                      km.cluster_centers_[macrostate_assignment_of_visited_microstates==i,1], 
+                      c=f"C{(1+i)}", s=40, lw=0.5, edgecolor="k", label=f"C{(1+i)}")
+
+    #ax.legend( fontsize=8)
+    fig.tight_layout()
+    plt.savefig(resultspath+name_data+"cmacro_state_picks3_i"+str(iter_found)+".png")
     picks = [
                 frame_state_list[state][np.random.randint(0,
                 len(frame_state_list[state]))]
@@ -331,7 +423,7 @@ while True:
     print("picks",picks)
     traj_select = [traj_fns2[pick[0]] for pick in picks]
     traj_select_all=[trajprotdir+'alltrajs/alltraj'+t[len(trajprotdir):] for t in traj_select]
-    frame_select = [pick[1]*vamp_stride*msm_stride for pick in picks]
+    frame_select = [pick[1]*vamp_stride for pick in picks]
     print("all",traj_select_all)
     print("time3", time.time()-time_start)
     idx=0
@@ -353,4 +445,10 @@ while True:
     print(" ")
     print("time4", time.time()-time_start)
     sys.stdout.flush()
+    plt.close('all') 
   sleep(10)
+ except Exception as e:
+    print("fail", type(e).__name__) # returns the name of the exception
+    print(e.__doc__)
+    print(e)
+    sleep(10)

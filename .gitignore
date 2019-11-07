@@ -1,6 +1,7 @@
 results/
 __pycache__/
 *.wcfgc
+log*
 *.log
 *.prof
 .rp,session.*
