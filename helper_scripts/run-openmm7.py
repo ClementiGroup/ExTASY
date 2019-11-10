@@ -20,6 +20,17 @@ import shutil
 from itertools import combinations
 from time import sleep
 import mdtraj 
+import linecache
+
+def PrintException():
+    exc_type, exc_obj, tb = sys.exc_info()
+    f = tb.tb_frame
+    lineno = tb.tb_lineno
+    filename = f.f_code.co_filename
+    linecache.checkcache(filename)
+    line = linecache.getline(filename, lineno, f.f_globals)
+    print('EXCEPTION IN ({}, LINE {} "{}"): {}'.format(filename, lineno, line.strip(), exc_obj))
+
 
 def get_xml(xml_file):
     # TODO file access control
@@ -128,6 +139,7 @@ try:
 except:
   strategy='extend'
 
+os.makedirs(args.path+'/tmp', exist_ok=True)
 if saveall=='True':
   os.makedirs(args.path+'/alltrajs', exist_ok=True)
 if strategy!='extend':
@@ -159,12 +171,15 @@ while True:
       savedcdfileextend=args.path+'/iter'+str(iter_found)+'_traj'+str(i)+'extend.dcd'
       savedcdfileall=args.path+'/alltrajs/alltrajiter'+str(iter_found)+'_traj'+str(i)+'.dcd'
       savedcdfileextendall=args.path+'/alltrajs/alltrajiter'+str(iter_found)+'_traj'+str(i)+'extend.dcd'
+      tmpfile=args.path+'/tmp/iter'+str(iter_found)+'_tmp'+str(i)+'.dcd'
+      tmpfileall=args.path+'tmp/iter'+str(iter_found)+'_tmp'+str(i)+'.dcd'
       a_topology_pdb = args.path+'/iter'+str(iter_found)+'_input'+str(i)+'.pdb' 
       a_platform = 'fastest'
       properties = None
       a_system_xml = 'system-5.xml'
       a_integrator_xml = 'integrator-5.xml'
-      
+      print("a_topology_pdb", a_topology_pdb)      
+ 
       if strategy=='extend':
         if not os.path.isfile(fileextend):
           shutil.copy2(oldoutpdb,fileextend)
@@ -212,14 +227,16 @@ while True:
         dcd1=mdtraj.load(savedcdfile,top=protpdb)
         dcd2=mdtraj.load(savedcdfileextend,top=protpdb)
         dcd3=mdtraj.join([dcd1,dcd2])
-        dcd3.save(savedcdfile)
+        dcd3.save(tmpfile)
         os.remove(savedcdfileextend)
+        shutil.move(tmpfile, savedcdfile)
         if saveall=="True":
           dcd1=mdtraj.load(savedcdfileall,top=allpdb)
           dcd2=mdtraj.load(savedcdfileextendall,top=allpdb)
           dcd3=mdtraj.join([dcd1,dcd2])
-          dcd3.save(savedcdfileall)
+          dcd3.save(tmpfileall)
           os.remove(savedcdfileextendall)
+          shutil.move(tmpfileall, savedcdfileall)
     
       if os.path.isfile(argsrestart):
         arr = np.load(argsrestart)
@@ -267,31 +284,35 @@ while True:
         dcd1=mdtraj.load(savedcdfile,top=protpdb)
         dcd2=mdtraj.load(savedcdfileextend,top=protpdb)
         dcd3=mdtraj.join([dcd1,dcd2])
-        dcd3.save(savedcdfile)
+        dcd3.save(tmpfile)
         os.remove(savedcdfileextend)
+        shutil.move(tmpfile, savedcdfile)
         if saveall=='True':
           print('final combine extend with all dcd')
           dcd1=mdtraj.load(savedcdfileall,top=allpdb)
           dcd2=mdtraj.load(savedcdfileextendall,top=allpdb)
           dcd3=mdtraj.join([dcd1,dcd2])
-          dcd3.save(savedcdfileall)
+          dcd3.save(tmpfileall)
           os.remove(savedcdfileextendall)
+          shutil.move(tmpfileall, savedcdfileall)
     
-        state = simulation.context.getState(getPositions=True, getVelocities=True,getEnergy=True)
-        pbv = state.getPeriodicBoxVectors(asNumpy=True)
-        vel = state.getVelocities(asNumpy=True)
-        pos = state.getPositions(asNumpy=True)
-        print(state.getPotentialEnergy(), state.getKineticEnergy())
-        PDBFile.writeFile(simulation.topology, pos, open(fileoutpdb, 'w'))
-        del simulation, integrator, system
-        #if args.extend=='True':
-        #  shutil.copy2(fileoutpdb,fileextend)
-        #  print("copied to", fileextend)
-        sys.stdout.flush()
+      state = simulation.context.getState(getPositions=True, getVelocities=True,getEnergy=True)
+      pbv = state.getPeriodicBoxVectors(asNumpy=True)
+      vel = state.getVelocities(asNumpy=True)
+      pos = state.getPositions(asNumpy=True)
+      print(state.getPotentialEnergy(), state.getKineticEnergy())
+      PDBFile.writeFile(simulation.topology, pos, open(fileoutpdb, 'w'))
+      print("saved", fileoutpdb)
+      del simulation, integrator, system
+      #if args.extend=='True':
+      #  shutil.copy2(fileoutpdb,fileextend)
+      #  print("copied to", fileextend)
+      sys.stdout.flush()
   except Exception as e:
     print(type(e).__name__) # returns the name of the exception
     print(e.__doc__)
     print(e)
+    PrintException()
     sleep(10)
     
 

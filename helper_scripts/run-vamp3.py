@@ -121,6 +121,7 @@ num_macrostates=Kconfig.num_macrostates
 vamp_lag=Kconfig.vamp_lag 
 vamp_dim =Kconfig.vamp_dim
 vamp_stride=Kconfig.vamp_stride
+vamp_epochs=Kconfig.vamp_epochs
 kmeans_stride =Kconfig.kmeans_stride
 msm_states =Kconfig.msm_states
 msm_lag=Kconfig.msm_lag
@@ -188,10 +189,11 @@ while True:
     sys.stdout.flush()
     sleep(10)
     continue
+  print("time0", time.time()-time_start)
   model = HDE(
       len(ca_pairs), 
       n_components=4, 
-      n_epochs=10, 
+      n_epochs=vamp_epochs, 
       learning_rate=1e-4,
       lag_time=vamp_lag,
       batch_normalization=False,
@@ -216,7 +218,7 @@ while True:
   axX.set_xlabel('TICA 0')
   axX.set_ylabel('TICA 1')
   figX.savefig(resultspath+name_data+"vampfe_i"+str(iter_found)+".png")
-  if project_tica=='True':
+  if Kconfig.project_tica=='True':
     tica_obj = pyemma.load(refticapath)
     yticaproj=np.concatenate(tica_obj.transform(data))
     xlim=(-2.2,1.7)
@@ -385,7 +387,7 @@ while True:
         selected_macrostate_mask = (macrostate_assignment_of_visited_microstates == selected_macrostate[i])
         #print(selected_macrostate, microstate_transitions_used[visited_microstates], macrostate_counts, counts[states_unique][selected_macrostate])
         counts_in_selected_macrostate = s[states_unique][selected_macrostate_mask]+1
-        print(i,counts_in_selected_macrostate,visited_microstates[selected_macrostate_mask])
+        print(i,selected_macrostate[i], counts_in_selected_macrostate,visited_microstates[selected_macrostate_mask])
         #print(parameters['select_micro_within_macro_type'])
         if select_micro_within_macro_type == 'sto_inv_linear':
             # within a macrostate, select a microstate based on count
