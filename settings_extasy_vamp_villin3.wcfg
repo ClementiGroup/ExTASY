@@ -15,7 +15,7 @@ CPUs_per_NODE           = 22                   # each replica uses that many Cus
 num_iterations          = 100                    # Number of iterations of Simulation-Analysis
 start_iter              = 0                    # Iteration number with which to start
 nsave                   = 1                    # number of iterations after which output is transfered to local machine
-remote_output_directory = '/gpfs/alpine/proj-shared/bip191/extasy_vamp_villin2/'   
+remote_output_directory = '/gpfs/alpine/proj-shared/bip191/extasy_vamp_villin3/'   
 
 #--------------------------Simulation--------------------------------
 system                  = '2F4K'
@@ -23,20 +23,20 @@ system                  = '2F4K'
 md_env                  = ["source /ccs/home/eh22/.bashrc","module load cuda/9.1.85", "module load cmake","module load gcc/7.4.0","module load python/3.6.6-anaconda3-5.3.0","conda activate vampextasy6"]
 env_ana_same             = 'False'
 ana_env                 = ["module unload python", "module load ibm-wml-ce/1.6.1-3", "conda activate vampextasy9","module list", "which python", "export PATH=/ccs/home/eh22/.conda/envs/vampextasy9/bin:$PATH","echo $PATH"]
-md_steps                = 1000000    
+md_steps                = 10000000    
 md_dir                  = './files-villin/'
 md_input_file           = 'villin.pdb'               # Entire path to the MD Input structure - Do not use $HOME or the likes
 md_reference            = 'villin-folded-ca.pdb'
 md_run_file             = 'run-openmm7.py'              # Entire path to the MD script - Do not use $HOME or the likes
 md_run_dir              = './helper_scripts/'
 md_use_xml              = 'yes'
-trajstride              = 5000
+trajstride              = 10000
 save_alltraj            = 'True'
 
 #--------------------------Strategy----------------------------------
 #strategy                = 'extend'
-#strategy                = 'cmicro'
-strategy                = 'cmacro'
+strategy                = 'cmicro'
+#strategy                = 'cmacro'
 
 #--------------------------Stretegy-settings----------------------------------
 helper_scripts          = './helper_scripts'
@@ -48,12 +48,12 @@ select_n_macro_type     = 'const'
 num_macrostates         = 20
 select_micro_within_macro_type    = 'sto_inv_linear'
 macrosstate_method      = 'kmeans'
-vamp_lag                = 40
+vamp_lag                = 30
 vamp_dim                = 10
 vamp_stride             = 1
-vamp_epochs             = 5
-kmeans_stride           = 20
+vamp_epochs             = 8
+kmeans_stride           = 50
 msm_states              = 500
-msm_lag                 = 40
+msm_lag                 = 200
 
 project_tica            = 'False'

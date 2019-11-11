@@ -430,21 +430,21 @@ while True:
 
     #ax.legend( fontsize=8)
     fig.tight_layout()
-    plt.savefig(resultspath+name_data+"cmacro_state_picks3_i"+str(iter_found)+".png")
-    picks = [
+  plt.savefig(resultspath+name_data+"cmacro_state_picks3_i"+str(iter_found)+".png")
+  picks = [
                 frame_state_list[state][np.random.randint(0,
                 len(frame_state_list[state]))]
                 for state in state_picks
                 ]
-    print("picks",picks)
-    traj_select = [traj_fns2[pick[0]] for pick in picks]
-    traj_select_all=[trajprotdir+'alltrajs/alltraj'+t[len(trajprotdir):] for t in traj_select]
-    frame_select = [pick[1]*vamp_stride for pick in picks]
-    print("all",traj_select_all)
-    print("time3", time.time()-time_start)
-    idx=0
-    print("writing")
-    for idx in range(n_pick):
+  print("picks",picks)
+  traj_select = [traj_fns2[pick[0]] for pick in picks]
+  traj_select_all=[trajprotdir+'alltrajs/alltraj'+t[len(trajprotdir):] for t in traj_select]
+  frame_select = [pick[1]*vamp_stride for pick in picks]
+  print("all",traj_select_all)
+  print("time3", time.time()-time_start)
+  idx=0
+  print("writing")
+  for idx in range(n_pick):
       try:
         sys.stdout.flush()
         tmp=mdtraj.load(topfileall)
@@ -458,10 +458,10 @@ while True:
           print(idx, "-missing", traj_select_all[idx])
       except:
         print(idx, "-fail write")
-    print(" ")
-    print("time4", time.time()-time_start)
-    sys.stdout.flush()
-    plt.close('all') 
+  print(" ")
+  print("time4", time.time()-time_start)
+  sys.stdout.flush()
+  plt.close('all') 
   sleep(10)
  except Exception as e:
     print("fail", type(e).__name__) # returns the name of the exception
