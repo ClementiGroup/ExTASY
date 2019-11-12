@@ -1,0 +1,63 @@
+
+
+REMOTE_HOST             = 'ornl.summit'   #'ncsa.bw' 'ncsa.bw_aprun'     # Label/Name of the Remote Machine
+ALLOCATION              = 'BIP191'                    # Allocation to be charged
+use_gpus                = 'True'
+QUEUE                   = 'batch' #'killable'#'batch' #'high'      #'normal'             # Name of the queue in the remote machine
+schema                  = 'local'
+
+#--------------------------General--------------------------------
+WALLTIME                = 120 #1440 #120    #720    #1440    #120         # Walltime to be requested for the pilot in minutes
+NODESIZE                = 9
+num_replicas            = 50                   #total num replica #num_parallel_MD_sim     = 5    #160           # Total Number of tasks or Compute Units
+GPUs_per_NODE           = 6
+CPUs_per_NODE           = 22                   # each replica uses that many Cus
+num_iterations          = 100                    # Number of iterations of Simulation-Analysis
+start_iter              = 0                    # Iteration number with which to start
+nsave                   = 1                    # number of iterations after which output is transfered to local machine
+remote_output_directory = '/gpfs/alpine/proj-shared/bip191/extasy_vamp_bba3-cmicro/'   
+
+#--------------------------Simulation--------------------------------
+system                  = '1FME'
+#md_env                  = ["module unload python","module load cuda/9.1.85", "module load cmake","module load gcc/7.4.0","module load python/3.6.6-anaconda3-5.3.0","conda activate vampextasy6","export PATH=/ccs/home/eh22/.conda/envs/vampextasy6/bin:$PATH"]
+md_env                  = ["source /ccs/home/eh22/.bashrc","module load cuda/9.1.85", "module load cmake","module load gcc/7.4.0","module load python/3.6.6-anaconda3-5.3.0","conda activate vampextasy6"]
+env_ana_same             = 'False'
+ana_env                 = ["module unload python", "module load ibm-wml-ce/1.6.1-3", "conda activate vampextasy9","module list", "which python", "export PATH=/ccs/home/eh22/.conda/envs/vampextasy9/bin:$PATH","echo $PATH"]
+#env_ana_same             = 'True'
+#ana_env                 = 'vpy4'
+md_steps                = 2000000    #100000=2min
+md_dir                  = './files-bba/'
+md_input_file           = 'bba.pdb'        # Entire path to the MD Input file - Do not use $HOME or the likes
+md_reference            = 'bba-folded-ca.pdb'
+md_run_file             = 'run-openmm7.py' #-long.mdp'    #grompp.mdp   # Entire path to the MD Parameters file - Do not use $HOME or the likes
+md_run_dir              = './helper_scripts/'
+md_use_xml              = 'yes'
+trajstride              = 10000
+save_alltraj            = 'True'
+
+strategy                = 'cmicro'
+#strategy                = 'extend'
+#strategy                = 'cmacro'
+
+#--------------------------Analysis----------------------------------
+helper_scripts          = './helper_scripts'
+script_ana              = 'run-vamp3.py'    #'run-tica-msm5.py'
+
+reweight                = 'no'
+koopman                 = 'yes'
+#koopman                 = 'no'
+
+select_n_macro_type     = 'const'
+num_macrostates         = 20
+select_micro_within_macro_type    = 'sto_inv_linear'
+macrosstate_method      = 'kmeans'
+vamp_lag                = 30
+vamp_dim                = 10
+vamp_stride             = 1
+vamp_epochs             = 8
+kmeans_stride           = 50
+msm_states              = 500
+msm_lag                 = 200
+
+project_tica            = 'False'
+

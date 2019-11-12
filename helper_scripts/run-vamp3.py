@@ -430,7 +430,7 @@ while True:
 
     #ax.legend( fontsize=8)
     fig.tight_layout()
-  plt.savefig(resultspath+name_data+"cmacro_state_picks3_i"+str(iter_found)+".png")
+    plt.savefig(resultspath+name_data+"cmacro_state_picks3_i"+str(iter_found)+".png")
   picks = [
                 frame_state_list[state][np.random.randint(0,
                 len(frame_state_list[state]))]
