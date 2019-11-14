@@ -1,0 +1,54 @@
+
+
+REMOTE_HOST             = 'ornl.summit_prte'   #'ncsa.bw' 'ncsa.bw_aprun'     # Label/Name of the Remote Machine
+ALLOCATION              = 'BIP191'                    # Allocation to be charged
+use_gpus                = 'True'
+QUEUE                   = 'batch' #'killable' #'batch' #'high'      #'normal'             # Name of the queue in the remote machine
+schema                  = 'local'
+
+#--------------------------General--------------------------------
+WALLTIME                = 120 #1440 #120    #720    #1440    #120         # Walltime to be requested for the pilot in minutes
+NODESIZE                = 9
+num_replicas            = 52                   #total num replica #num_parallel_MD_sim     = 5    #160           # Total Number of tasks or Compute Units
+GPUs_per_NODE           = 6
+CPUs_per_NODE           = 22                   # each replica uses that many Cus
+num_iterations          = 100                    # Number of iterations of Simulation-Analysis
+start_iter              = 0                    # Iteration number with which to start
+nsave                   = 1                    # number of iterations after which output is transfered to local machine
+remote_output_directory = '/gpfs/alpine/proj-shared/bip191/extasy_tica_mdonly_chignolin/'   
+
+#--------------------------Simulation--------------------------------
+system                  = 'CLN025'
+md_env                  = ["module unload python","module load python/3.6.6-anaconda3-5.3.0","source /ccs/home/eh22/.bashrc", "module load cuda/9.1.85", "module load cmake","module load gcc/7.4.0","conda activate vampextasy6","export PATH=/ccs/home/eh22/.conda/envs/vampextasy6/bin:$PATH"]
+#md_env                  = ["source /ccs/home/eh22/.bashrc","module load cuda/9.1.85", "module load cmake","module load gcc/7.4.0","module load python/3.6.6-anaconda3-5.3.0","conda activate vampextasy6"]
+env_ana_same             = 'True'
+#ana_env                 = 'vpy4'
+md_steps                = 10000000    #100000=2min
+md_dir                  = './files-chignolin/'
+md_input_file           = 'chignolin.pdb'        # Entire path to the MD Input file - Do not use $HOME or the likes
+md_reference            = 'chignolin-ca-crystal.pdb'
+md_run_file             = 'run-openmm7.py' #-long.mdp'    #grompp.mdp   # Entire path to the MD Parameters file - Do not use $HOME or the likes
+md_run_dir              = './helper_scripts/'
+md_use_xml              = 'yes'
+trajstride              = 10000
+save_alltraj            = 'True'
+
+#strategy                = 'cmicro'
+strategy                = 'extend'
+#strategy                = 'cmacro'
+
+#--------------------------Analysis----------------------------------
+helper_scripts          = './helper_scripts'
+script_ana              = 'run-tica-msm5.py'
+koopman                 = 'yes'
+#koopman                 = 'no'
+
+select_n_macro_type     = 'const'    #'kin_content'
+num_macrostates         = 20
+
+tica_lag                = 440
+tica_dim                = 10
+tica_stride             = 1
+msm_stride              = 1
+msm_states              = 200
+msm_lag                 = 440

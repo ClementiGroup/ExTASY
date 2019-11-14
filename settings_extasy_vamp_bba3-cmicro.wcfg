@@ -57,7 +57,7 @@ vamp_stride             = 1
 vamp_epochs             = 8
 kmeans_stride           = 50
 msm_states              = 500
-msm_lag                 = 200
+msm_lag                 = 20
 
 project_tica            = 'False'
 
