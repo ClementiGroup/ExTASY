@@ -176,8 +176,14 @@ while True:
       a_topology_pdb = args.path+'/iter'+str(iter_found)+'_input'+str(i)+'.pdb' 
       a_platform = 'fastest'
       properties = None
-      a_system_xml = 'system-5.xml'
-      a_integrator_xml = 'integrator-5.xml'
+      try:
+        a_system_xml = str(Kconfig.systemxml)
+      except:
+        a_system_xml = 'system-5.xml'
+      try:
+        a_integrator_xml = str(Kconfig.integratorxml)
+      except:
+        a_integrator_xml = 'integrator-5.xml'
       print("a_topology_pdb", a_topology_pdb)      
  
       if strategy=='extend':

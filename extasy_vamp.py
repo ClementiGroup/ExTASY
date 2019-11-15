@@ -38,7 +38,14 @@ def create_workflow(Kconfig,args):
     num_parallel=int(Kconfig.NODESIZE)*int(Kconfig.GPUs_per_NODE)
     num_replicas=int(Kconfig.num_replicas)
     script_ana=str(Kconfig.script_ana)#run-tica-msm4.py
-
+    try:
+      systemxml=str(Kconfig.systemxml)
+    except:
+      systemxml='system-5.xml'
+    try:
+      integratorxml=str(Kconfig.integratorxml)
+    except:
+      integratorxml='integrator-5.xml'
     md_settings=Kconfig.md_env
     if Kconfig.env_ana_same =='True':
       ana_settings=md_settings
@@ -126,8 +133,8 @@ def create_workflow(Kconfig,args):
                                   #'--md_steps',str(Kconfig.md_steps), '--save_traj', 'True','>', 'md.log']
           if Kconfig.md_use_xml=='yes':
             link_arr=['$SHARED/%s > run_openmm.py' % (os.path.basename(Kconfig.md_run_file)),
-                      '$SHARED/system-5.xml > system-5.xml',
-                      '$SHARED/integrator-5.xml > integrator-5.xml', '$SHARED/%s > %s'%(args.Kconfig,args.Kconfig)]            
+                      '$SHARED/%s > %s' % (systemxml, systemxml),
+                      '$SHARED/%s > %s' % (integratorxml, integratorxml), '$SHARED/%s > %s'%(args.Kconfig,args.Kconfig)]            
           else:
             link_arr=['$SHARED/%s > run_openmm.py' % (os.path.basename(Kconfig.md_run_file)), '$SHARED/%s > %s'%(args.Kconfig,args.Kconfig)]
           copy_arr=[]
@@ -245,9 +252,18 @@ if __name__ == '__main__':
         shared_data_all = [args.Kconfig
                            ]
         script_ana=str(Kconfig.script_ana)
+        try:
+          systemxml=str(Kconfig.systemxml)
+        except:
+           systemxml='system-5.xml'
+        try:
+          integratorxml=str(Kconfig.integratorxml)
+        except:
+          integratorxml='integrator-5.xml'
+
         if Kconfig.md_use_xml=='yes':
-          shared_data_all=shared_data_all+['%s/system-5.xml' % Kconfig.md_dir,
-                                           '%s/integrator-5.xml' % Kconfig.md_dir,
+          shared_data_all=shared_data_all+['%s/%s' % (Kconfig.md_dir, systemxml),
+                                           '%s/%s' % (Kconfig.md_dir, integratorxml),
                                            Kconfig.md_dir+Kconfig.md_reference,
                                            Kconfig.md_run_dir+Kconfig.md_run_file,
                                            Kconfig.md_dir+Kconfig.md_input_file,
