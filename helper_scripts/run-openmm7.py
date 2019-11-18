@@ -195,6 +195,12 @@ while True:
         if not os.path.isfile(fileextend):
           shutil.copy2(restartpdb,fileextend)
           print("restart", restartpdb, fileextend)
+      
+      num_lines = sum(1 for line in open(fileextend))
+      if num_lines<10:
+        os.remove(fileextend)
+        print("restart/extend file not enough lines")
+        raise ValueError("restart/extend file not enough lines")
     
       platform, pdb, (system_xml, system), (integrator_xml, integrator) \
        = read_input(a_platform, a_topology_pdb, a_system_xml, a_integrator_xml)
