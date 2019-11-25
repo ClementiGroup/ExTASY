@@ -282,8 +282,9 @@ while True:
         vel = state.getVelocities(asNumpy=True)
         pos = state.getPositions(asNumpy=True)
         remainingsteps=remainingsteps-executesteps
+        nowtime=datetime.now()
         np.savez(argsrestart, positions=pos, box_vectors=pbv, velocities=vel, remainingsteps=remainingsteps)
-      
+        np.savez(argsrestart[:-4]+'_2.npz', nowtime=str(nowtime)) 
       end = datetime.now()
       elapsed = end -start
       time_el=elapsed.seconds + elapsed.microseconds*1e-6

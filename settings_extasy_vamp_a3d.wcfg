@@ -12,7 +12,7 @@ NODESIZE                = 9
 num_replicas            = 50                   #total num replica #num_parallel_MD_sim     = 5    #160           # Total Number of tasks or Compute Units
 GPUs_per_NODE           = 6
 CPUs_per_NODE           = 22                   # each replica uses that many Cus
-num_iterations          = 100                    # Number of iterations of Simulation-Analysis
+num_iterations          = 1000                    # Number of iterations of Simulation-Analysis
 start_iter              = 0                    # Iteration number with which to start
 nsave                   = 1                    # number of iterations after which output is transfered to local machine
 remote_output_directory = '/gpfs/alpine/proj-shared/bip191/extasy_vamp_a3d/'   
