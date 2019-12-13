@@ -7,7 +7,7 @@ QUEUE                   = 'batch' #'killable' #'batch' #'high'      #'normal'   
 schema                  = 'local'
 
 #--------------------------General--------------------------------
-WALLTIME                = 120 #1440 #120    #720    #1440    #120         # Walltime to be requested for the pilot in minutes
+WALLTIME                = 10 #1440 #120    #720    #1440    #120         # Walltime to be requested for the pilot in minutes
 NODESIZE                = 1
 num_replicas            = 5                   #total num replica #num_parallel_MD_sim     = 5    #160           # Total Number of tasks or Compute Units
 GPUs_per_NODE           = 6
@@ -15,7 +15,7 @@ CPUs_per_NODE           = 22                   # each replica uses that many Cus
 num_iterations          = 100                    # Number of iterations of Simulation-Analysis
 start_iter              = 0                    # Iteration number with which to start
 nsave                   = 1                    # number of iterations after which output is transfered to local machine
-remote_output_directory = '/gpfs/alpine/scratch/xxx/extasy_chignolin_example/'   
+remote_output_directory = /gpfs/alpine/scratch/xxx/extasy_chignolin_example/ #'/gpfs/alpine/proj-shared/xxx/extasy_chignolin_example/'   
 
 #--------------------------Simulation--------------------------------
 system                  = 'CLN025'

@@ -30,7 +30,7 @@ git clone https://github.com/ClementiGroup/Vampextasy.git
 cd Vampextasy
 ```
 ## Executing the example
-The settings file for the example is ```settings_extasy_chignolin_example.wcfg```. It will run ```cmicro`` adpaptive strategy for Chignolin protein with 5 replicas for
+The settings file for the example is ```settings_extasy_chignolin_example.wcfg```. It will run ```cmicro``` adpaptive strategy for Chignolin protein with 5 replicas for
 Change the ```remote_output_directory``` in the settings file, so that the directory is empty and accesible to you. VampExTASY will append to the previous results in the directory. For longer simulations run inside tmux on an machine which can run undisturbed for long times.
 Execution command for example:
 ```
