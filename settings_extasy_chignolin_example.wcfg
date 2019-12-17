@@ -15,7 +15,7 @@ CPUs_per_NODE           = 22                   # each replica uses that many Cus
 num_iterations          = 100                    # Number of iterations of Simulation-Analysis
 start_iter              = 0                    # Iteration number with which to start
 nsave                   = 1                    # number of iterations after which output is transfered to local machine
-remote_output_directory = /gpfs/alpine/scratch/xxx/extasy_chignolin_example/ #'/gpfs/alpine/proj-shared/xxx/extasy_chignolin_example/'   
+remote_output_directory = '/gpfs/alpine/proj-shared/bip191/extasy_chignolin_example/'  
 
 #--------------------------Simulation--------------------------------
 system                  = 'CLN025'

@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 __author__ = 'Vivek <vivek.balasubramanian@rutgers.edu> Eugen <eh22@rice.edu>'
-__copyright__ = 'Copyright 2018, http://radical.rutgers.edu,  http://clementiresearch.rice.edu'
+__copyright__ = 'Copyright 2019, http://radical.rutgers.edu,  http://clementiresearch.rice.edu'
 __license__ = 'MIT'
-__use_case_name__ = 'Gromacs + LSDMap simulation-analysis using EnTK'
+__use_case_name__ = 'Asynch Adaptive simulation-analysis using EnTK'
 
 
 from radical.entk import Pipeline, Stage, Task, AppManager
