@@ -20,7 +20,7 @@ import socket
 import math
 
 # CONDA_PREFIX reads - $HOME/.conda/envs/[CONDA ENV NAME]
-PYTHON_PATH="{}/bin/python".format(os.environ['CONDA_PREFIX'])
+#PYTHON_PATH="{}/bin/python".format(os.environ['CONDA_PREFIX'])
 print(socket.gethostname())
 
 def create_workflow(Kconfig,args):

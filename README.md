@@ -3,9 +3,9 @@
 The goal of this package is to execute Adaptive sampling on HPCs in a scalable, effecient way.
 
 ## Setup and installation on Local system, not necessary for Summit
-Make a new conda python2.7 installation:
+Make a new conda python (python2 or python3) installation:
 ```
-conda install -c conda-forge rabbitmq-server tmux pip git python=2.7.14
+conda install -c conda-forge rabbitmq-server tmux pip git python
 pip install radical.entk
 ```
 Check ```radical-stack``` to make sure radical packages are installed.

@@ -24,14 +24,14 @@ md_env                  = ["module unload python","module load python/3.6.6-anac
 ana_env                 = ["module unload python", "module load ibm-wml-ce/1.6.1-3", "conda activate vampextasy9","module list", "which python", "export PATH=/ccs/home/eh22/.conda/envs/vampextasy9/bin:$PATH","echo $PATH"]
 env_ana_same             = 'False' #'True'
 #ana_env                 = 'vpy4'
-md_steps                = 10000000    #100000=2min
+md_steps                = 500000    #100000=2min
 md_dir                  = './files-chignolin/'
 md_input_file           = 'chignolin.pdb'        # Entire path to the MD Input file - Do not use $HOME or the likes
 md_reference            = 'chignolin-ca-crystal.pdb'
 md_run_file             = 'run-openmm7.py' #-long.mdp'    #grompp.mdp   # Entire path to the MD Parameters file - Do not use $HOME or the likes
 md_run_dir              = './helper_scripts/'
 md_use_xml              = 'yes'
-trajstride              = 10000
+trajstride              = 1000
 save_alltraj            = 'True'
 
 #--------------------------Strategy----------------------------------
@@ -59,7 +59,7 @@ vamp_stride             = 1
 vamp_epochs             = 8
 kmeans_stride           = 50
 msm_states              = 500
-msm_lag                 = 200
+msm_lag                 = 20
 
 project_tica            = 'False'
 
