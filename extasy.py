@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 __author__ = 'Vivek <vivek.balasubramanian@rutgers.edu> Eugen <eh22@rice.edu>'
-__copyright__ = 'Copyright 2019, http://radical.rutgers.edu,  http://clementiresearch.rice.edu'
+__copyright__ = 'Copyright 2020, http://radical.rutgers.edu,  http://clementiresearch.rice.edu'
 __license__ = 'MIT'
 __use_case_name__ = 'Asynch Adaptive simulation-analysis using EnTK'
 
@@ -16,11 +16,8 @@ import json
 import traceback
 import time
 import socket
-#import numpy as np
 import math
 
-# CONDA_PREFIX reads - $HOME/.conda/envs/[CONDA ENV NAME]
-#PYTHON_PATH="{}/bin/python".format(os.environ['CONDA_PREFIX'])
 print(socket.gethostname())
 
 def create_workflow(Kconfig,args):
@@ -31,13 +28,11 @@ def create_workflow(Kconfig,args):
     # ------------------------------------------------------------------------------------------------------------------
     cur_iter = int(Kconfig.start_iter)#0
     #assumed of iteration non zero that files are in combined_path
-    if str(socket.gethostname())=='giotto.rice.edu':
-      combined_path=str(Kconfig.remote_output_directory)+'-giotto' 
-    else:
-      combined_path=str(Kconfig.remote_output_directory)  #'/u/sciteam/hruska/scratch/extasy-tica'
+    combined_path=str(Kconfig.remote_output_directory) 
     num_parallel=int(Kconfig.NODESIZE)*int(Kconfig.GPUs_per_NODE)
     num_replicas=int(Kconfig.num_replicas)
-    script_ana=str(Kconfig.script_ana)#run-tica-msm4.py
+    script_ana=str(Kconfig.script_ana)
+    config_file=str(args.Kconfig).rsplit('/',1)[-1]
     try:
       systemxml=str(Kconfig.systemxml)
     except:
@@ -58,14 +53,6 @@ def create_workflow(Kconfig,args):
     cur_iter=max(0,iter_found-1)
     print("cur_iter",cur_iter)
     if cur_iter==0:
-      #pre_proc_stage = Stage()
-      #pre_proc_task = Task()
-      #pre_proc_task.pre_exec = ['export tasks=pre_proc_task','export iter=%s' % cur_iter, 'export OMP_NUM_THREADS=1']
-      #pre_proc_task.executable = ['mv']
-      #pre_proc_task.arguments = [ combined_path, combined_path + time.strftime("%Y-%m-%d-%H-%M") ]
-      #pre_proc_task_ref = '$Pipeline_%s_Stage_%s_Task_%s' % (wf.uid, pre_proc_stage.uid, pre_proc_task.uid)
-      #pre_proc_stage.add_tasks(pre_proc_task)
-      #wf.add_stages(pre_proc_stage)
       pre_proc_stage2 = Stage()
       pre_proc_task2 = Task()
       pre_proc_task2.pre_exec = ['export tasks=pre_proc_task','export iter=%s' % cur_iter, 'export OMP_NUM_THREADS=1']
@@ -96,17 +83,9 @@ def create_workflow(Kconfig,args):
         sim_task_ref = list()
         num_allocated_rep=0
         num_used_parallel=0
-        #num_used_threads=0
-        #print(def_rep_per_thread)
         while(num_allocated_rep<num_replicas):
-          #if (num_used_threads>=num_parallel):
-          #   print("ALLERT tried use more gpus than allocated")
           def_rep_per_thread=int(math.ceil(float(num_replicas-num_allocated_rep)/float(num_parallel-num_used_parallel)))
           use_replicas=min(def_rep_per_thread, num_replicas-num_allocated_rep)
-          #if ((num_replicas-num_allocated_rep)>def_rep_per_thread):  # check if use all threads
-          #   use_replicas=def_rep_per_thread
-          #else:  #use pnly part of threads
-          #   use_replicas=(num_replicas-num_allocated_rep)
           print("u", cur_iter, use_replicas, num_replicas, num_parallel, def_rep_per_thread, num_allocated_rep,num_used_parallel)
           sim_task = Task()
           sim_task.executable = ['python']
@@ -125,7 +104,7 @@ def create_workflow(Kconfig,args):
                                     'threads_per_process': 20, 
                                     'thread_type': 'OpenMP'
                                   }
-          sim_task.arguments = ['run_openmm.py','--Kconfig', str(args.Kconfig), '--idxstart',str(num_allocated_rep), '--idxend',str(num_allocated_rep+use_replicas),
+          sim_task.arguments = ['run_openmm.py','--Kconfig', config_file, '--idxstart',str(num_allocated_rep), '--idxend',str(num_allocated_rep+use_replicas),
                                   '--path',combined_path,'>', 'md.log']
                                   #'--trajstride', str(Kconfig.trajstride),'--Kconfig', str(args.Kconfig), 
                                   #'--idxstart',str(num_allocated_rep), '--idxend',str((num_allocated_rep+use_replicas)),
@@ -134,9 +113,9 @@ def create_workflow(Kconfig,args):
           if Kconfig.md_use_xml=='yes':
             link_arr=['$SHARED/%s > run_openmm.py' % (os.path.basename(Kconfig.md_run_file)),
                       '$SHARED/%s > %s' % (systemxml, systemxml),
-                      '$SHARED/%s > %s' % (integratorxml, integratorxml), '$SHARED/%s > %s'%(args.Kconfig,args.Kconfig)]            
+                      '$SHARED/%s > %s' % (integratorxml, integratorxml), '$SHARED/%s > %s'%(config_file,config_file)]            
           else:
-            link_arr=['$SHARED/%s > run_openmm.py' % (os.path.basename(Kconfig.md_run_file)), '$SHARED/%s > %s'%(args.Kconfig,args.Kconfig)]
+            link_arr=['$SHARED/%s > run_openmm.py' % (os.path.basename(Kconfig.md_run_file)), '$SHARED/%s > %s'%(config_file,config_file)]
           copy_arr=[]
           if cur_iter==0:
             for idx in range(num_allocated_rep, num_allocated_rep+use_replicas):
@@ -188,7 +167,7 @@ def create_workflow(Kconfig,args):
                                     'threads_per_process': 20, 
                                     'thread_type': 'OpenMP'
                                   }
-          ana_task.arguments = [script_ana,'--Kconfig', str(args.Kconfig), '>', "analysis.log"]
+          ana_task.arguments = [script_ana,'--Kconfig', config_file, '>', "analysis.log"]
           ana_task.copy_output_data = ['analysis.log > %s/analysis_iter%s_r%s.log' % (combined_path, cur_iter, anatask)]
           ana_task_ref = '$Pipeline_%s_Stage_%s_Task_%s'%(wf.uid, sim_stage.uid, ana_task.uid)
           sim_stage.add_tasks(ana_task) 
