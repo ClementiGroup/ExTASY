@@ -33,11 +33,11 @@ git clone https://github.com/ClementiGroup/extasy.git
 cd extasy
 ```
 ## Executing the example
-The settings file for the example is ```settings_extasy_chignolin_example.wcfg```. It will run ```cmicro``` adaptive strategy for Chignolin protein with 5 replicas for couple iterations.
+The settings file for the example is ```settings/settings_extasy_chignolin_example.wcfg```. It will run ```cmicro``` adaptive strategy for Chignolin protein with 5 replicas for couple iterations.
 Change the ```remote_output_directory``` in the settings file, so that the directory is empty and accessible to you. ExTASY will append to the previous results in the directory. For longer simulations run inside tmux on a machine which can run undisturbed for long times.
 Execution command for example:
 ```
-python extasy.py --Kconfig settings_extasy_chignolin_example.wcfg
+python extasy.py --Kconfig settings/settings_extasy_chignolin_example.wcfg
 ```
 The expected run time is 10 minutes in addition to the queue time.
 
@@ -49,7 +49,7 @@ The expected run time is 10 minutes in addition to the queue time.
 
 ## Adapt to a protein of your choice
 * Copy the directory files-chignolin, replace the pdb structures and the xml files with files of your protein.
-* Copy settings_extasy_example_chignolin.wcfg and change md_dir, md_input_file, md_reference.
+* Copy settings/settings_extasy_example_chignolin.wcfg and change md_dir, md_input_file, md_reference.
 * If necessary change in the settings file the walltime, NODESIZE and num_replicas.
 
 ## Change molecular dynamics engine to your choice 
@@ -61,7 +61,7 @@ The expected run time is 10 minutes in addition to the queue time.
 ## Adapt analysis step to your choice 
 * Copy helper_scrips/run-vamp3.py and change the analysis steps as desired.
 * Change in settings file parameter script_ana from run-vamp3.py to your analysis script.
-* change in extasy_vamp.py the analysis tasks parameters, the ana_task.arguments has to call your script with required files and paths.  
+* change in extasy.py the analysis tasks parameters, the ana_task.arguments has to call your script with required files and paths.  
 
 ## Notes 
 The ```extasy.py``` script contains information about the application
