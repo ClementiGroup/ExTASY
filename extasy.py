@@ -58,7 +58,7 @@ def create_workflow(Kconfig,args):
       pre_proc_task2.pre_exec = ['export tasks=pre_proc_task','export iter=%s' % cur_iter, 'export OMP_NUM_THREADS=1']
       pre_proc_task2.executable = ['ls']
       pre_proc_task2.arguments = ['-l']
-      pre_proc_task2.copy_input_data = ['$SHARED/%s > %s/%s' % (args.Kconfig,combined_path, args.Kconfig),
+      pre_proc_task2.copy_input_data = ['$SHARED/%s > %s/%s' % (config_file,combined_path, config_file),
                                      '$SHARED/%s > %s/%s' % (script_ana,combined_path,script_ana),
                                      '$SHARED/%s > %s/%s' % (Kconfig.md_run_file,combined_path,Kconfig.md_run_file),
                                        '$SHARED/%s > %s/%s' % (Kconfig.md_reference, combined_path, Kconfig.md_reference)]# '$SHARED/%s > %s/%s' % ('analyze3.py', combined_path, 'analyze3.py') ] 
@@ -156,7 +156,7 @@ def create_workflow(Kconfig,args):
           ana_task.executable = ['python']
           pre_exec_arr = ana_settings
           ana_task.pre_exec = pre_exec_arr
-          ana_task.link_input_data = ['$SHARED/%s > %s'%(script_ana, script_ana), '$SHARED/%s > %s'%(args.Kconfig,args.Kconfig)]
+          ana_task.link_input_data = ['$SHARED/%s > %s'%(script_ana, script_ana), '$SHARED/%s > %s'%(config_file,config_file)]
           ana_task.gpu_reqs = { 'processes': 1,
                                     'process_type': None,
                                     'threads_per_process': 1,
