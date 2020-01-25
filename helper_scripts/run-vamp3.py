@@ -134,6 +134,10 @@ try:
   macrostate_method=Kconfig.macrostate_method
 except:
   macrostate_method='kmeans'
+try:
+  projection=Kconfig.projection
+except:
+  projection='vamp'
 
 project_tica='True'
 refticapath='/gpfs/alpine/proj-shared/bip191/objchigtica1-tica.obj'
@@ -174,23 +178,25 @@ while True:
       traj_fns2.append(traj_fns[idx])
     except:
       print("failed load",traj_fns[idx])
-  data[0].max()
-  scaler = pre.MinMaxScaler(feature_range=(-1, 1))
-  scaler.fit(data[0])
-  data2 = [scaler.transform(d) for d in data]
-  print("\n",data2[1].max())
-  print(len(data2))
-  nfeat = len(feat.describe())
-  print(nfeat)
-  lengthsall=max([data22.shape[0] for data22 in data2])
-  print("lengthsmax",lengthsall)
-  if lengthsall<vamp_lag:
-    print("trajs not long enough")
-    sys.stdout.flush()
-    sleep(10)
-    continue
-  print("time0", time.time()-time_start)
-  model = HDE(
+
+  if projection=='vamp':
+    print(data[0].max())
+    scaler = pre.MinMaxScaler(feature_range=(-1, 1))
+    scaler.fit(data[0])
+    data2 = [scaler.transform(d) for d in data]
+    print("\n",data2[1].max())
+    print(len(data2))
+    nfeat = len(feat.describe())
+    print(nfeat)
+    lengthsall=max([data22.shape[0] for data22 in data2])
+    print("lengthsmax",lengthsall)
+    if lengthsall<vamp_lag:
+      print("trajs not long enough")
+      sys.stdout.flush()
+      sleep(10)
+      continue
+    print("time0", time.time()-time_start)
+    model = HDE(
       len(ca_pairs), 
       n_components=4, 
       n_epochs=vamp_epochs, 
@@ -203,21 +209,37 @@ while True:
       activation='tanh',
       latent_space_noise=0.1,
       verbose=False
-  )
-  model.fit(data2)
-  print("time1", time.time()-time_start)
-  slow_modes = [model.transform(d) for d in data2]
-  hde_timescales = model.timescales_
-  del model
-  print("hde_timescales", hde_timescales)
-  print("slow modes", slow_modes[0][0,:10])
-  yall_slow_modes = np.concatenate(slow_modes)
-  yall=yall_slow_modes
-  yall_slow_modes.shape
-  figX, axX,mi = pyemma.plots.plot_free_energy(yall_slow_modes[:,0], yall_slow_modes[:,1],legacy=False)
-  axX.set_xlabel('TICA 0')
-  axX.set_ylabel('TICA 1')
-  figX.savefig(resultspath+name_data+"vampfe_i"+str(iter_found)+".png")
+    )
+    model.fit(data2)
+    print("time1", time.time()-time_start)
+    slow_modes = [model.transform(d) for d in data2]
+    hde_timescales = model.timescales_
+    del model
+    print("hde_timescales", hde_timescales)
+    print("slow modes", slow_modes[0][0,:10])
+    yall_slow_modes = np.concatenate(slow_modes)
+    yall=yall_slow_modes
+    yall_slow_modes.shape
+    figX, axX,mi = pyemma.plots.plot_free_energy(yall_slow_modes[:,0], yall_slow_modes[:,1],legacy=False)
+    axX.set_xlabel('TICA 0')
+    axX.set_ylabel('TICA 1')
+    figX.savefig(resultspath+name_data+"vampfe_i"+str(iter_found)+".png")
+
+  if projection=='tica':
+    lengthsall=max([data22.shape[0] for data22 in data])
+    print("lengthsmax",lengthsall)
+    tica_obj_tmp = pyemma.coordinates.tica(data, lag=vamp_lag, dim=vamp_dim, kinetic_map=True, stride=vamp_stride, weights='empirical')
+    print("time1", time.time()-time_start)
+    slow_modes = tica_obj_tmp.get_output(stride=vamp_stride)
+    tica_timescales = tica_obj_tmp.timescales
+    print("tica_timescales", tica_timescales)
+    print("slow modes", slow_modes[0][0,:10])
+    yall_slow_modes = np.concatenate(slow_modes)
+    yall=yall_slow_modes
+    yall_slow_modes.shape
+    figX, axX = pyemma.plots.plot_free_energy(yall_slow_modes[:,0], yall_slow_modes[:,1])
+    figX.savefig(resultspath+name_data+'ticafe_i'+str(iter_found)+'.png')
+
   if Kconfig.project_tica=='True':
     tica_obj = pyemma.load(refticapath)
     yticaproj=np.concatenate(tica_obj.transform(data))
