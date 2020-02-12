@@ -251,7 +251,10 @@ while True:
           shutil.move(tmpfileall, savedcdfileall)
     
       if os.path.isfile(argsrestart):
+        np_load_old = np.load
+        np.load = lambda *a,**k: np_load_old(*a, allow_pickle=True, **k)
         arr = np.load(argsrestart)
+        np.load = np_load_old
         simulation.context.setPositions(arr['positions'] * u.nanometers)
         simulation.context.setVelocities(arr['velocities'] * u.nanometers/u.picosecond)
         simulation.context.setPeriodicBoxVectors(*arr['box_vectors'] * u.nanometers)
@@ -276,7 +279,7 @@ while True:
       sys.stdout.flush() 
       start=datetime.now()
       while remainingsteps>0:
-        #print(remainingsteps)
+        print("remainingsteps",remainingsteps)
         executesteps=min(trajstride, remainingsteps)
         simulation.step(executesteps)
         vel = state.getVelocities(asNumpy=True)
