@@ -1,0 +1,202 @@
+
+{
+    "local.localhost" : {
+        "project"  : null,
+        "queue"    : null,
+        "schema"   : null,
+        "cores"    : 1,
+        "gpus"     : 2
+    },
+
+    "local.localhost_prte" : {
+        "project"  : null,
+        "queue"    : null,
+        "schema"   : null,
+        "cores"    : 64
+    },
+
+    "local.localhost_funcs" : {
+        "project"  : null,
+        "queue"    : null,
+        "schema"   : "ssh",
+        "cores"    : 64
+    },
+
+    "local.devel" : {
+        "project"  : null,
+        "queue"    : null,
+        "schema"   : null,
+        "cores"    : 64
+    },
+
+    "nersc.edison" : {
+        "project"  : null,
+        "queue"    : "debug",
+        "schema"   : "ssh",
+        "cores"    : 64
+    },
+
+    "xsede.supermic_ssh" : {
+        "project"  : "TG-MCB090174",
+        "queue"    : "workq",
+        "schema"   : "gsissh",
+        "cores"    : 64
+    },
+
+    "xsede.supermic" : {
+        "project"  : "TG-MCB090174",
+        "queue"    : "workq",
+        "schema"   : "gsissh",
+        "cores"    : 80
+    },
+
+    "xsede.supermic_orte" : {
+        "project"  : "TG-CCR140028",
+        "queue"    : "workq",
+        "schema"   : "gsissh",
+        "cores"    : 80
+    },
+
+    "princeton.tiger_cpu" : {
+        "project"  : "geo",
+        "queue"    : "cpu",
+        "schema"   : "ssh",
+        "cores"    : 40
+    },
+
+    "princeton.tiger_gpu" : {
+        "project"  : "geo",
+        "queue"    : "gpu",
+        "schema"   : "local",
+        "cores"    : 56
+    },
+
+    "xsede.frontera" : {
+        "project"  : "FTA-Jha",
+        "queue"    : "development",
+        "schema"   : "local",
+        "cores"    : 64
+    },
+
+    "xsede.bridges" : {
+        "project"  : null,
+        "queue"    : "RM-small",
+        "schema"   : "gsissh",
+        "cores"    : 24
+    },
+
+    "xsede.wrangler" : {
+        "project"  : "TG-MCB090174",
+        "queue"    : "debug",
+        "schema"   : "gsissh",
+        "cores"    : 24
+    },
+
+    "xsede.comet"  : {
+        "project"  : "TG-MCB090174",
+        "queue"    : "compute",
+        "schema"   : "gsissh",
+        "cores"    : 64
+    },
+
+    "xsede.comet_ssh"  : {
+        "project"  : "TG-MCB090174",
+        "queue"    : "compute",
+        "schema"   : "gsissh",
+        "cores"    : 64
+    },
+
+    "xsede.comet_ssh_funcs"  : {
+        "project"  : "TG-MCB090174",
+        "queue"    : "compute",
+        "schema"   : "gsissh",
+        "cores"    : 64
+    },
+
+    "xsede.comet_ortelib"  : {
+        "project"  : "TG-MCB090174",
+        "queue"    : "debug",
+        "schema"   : "gsissh",
+        "cores"    : 96
+    },
+
+    "xsede.stampede2_ssh"  : {
+        "project"  : "TG-MCB090174",
+        "queue"    : "development",
+        "schema"   : "local",
+        "cores"    : 204
+    },
+
+    "xsede.stampede2_srun"  : {
+        "project"  : "TG-MCB090174",
+        "queue"    : "development",
+        "schema"   : "local",
+        "cores"    : 204
+    },
+
+    "ncar.cheyenne": {
+	    "project"  : "URTG0014",
+	    "queue"    : "regular",
+	    "schema"   : "local",
+	    "cores"    : 72
+    },
+
+    "ornl.summit"  : {
+        "project"  : "CSC343",
+        "queue"    : "batch",
+        "schema"   : "local",
+        "cores"    : 168
+    },
+
+    "ornl.summit_prte" : {
+        "project"  : "geo111",
+        "queue"    : "batch",
+        "schema"   : "local",
+        "cores"    : 168
+    },
+
+    "ornl.rhea_aprun"   : {
+        "project"  : "BIP149",
+        "queue"    : "batch",
+        "schema"   : "local",
+        "cores"    : 64
+    },
+
+    "osg.xsede-virt-clust"   : {
+      # "project"  : "TG-CCR140028",
+        "project"  : "TG-MCB090174",
+        "queue"    : null,
+        "schema"   : "gsissh",
+        "cores"    : 1
+    },
+
+    "osg.connect" : {
+        "project"  : "RADICAL",
+        "queue"    : null,
+        "schema"   : "ssh",
+        "cores"    : 64
+    },
+
+    "fub.allegro"   : {
+        "project"  : null,
+        "queue"    : null,
+        "schema"   : "ssh",
+        "cores"    : 36,
+        "gpus"     : 12
+    },
+
+    "radical.one" : {
+        "project"  : null,
+        "queue"    : null,
+        "schema"   : "ssh",
+        "cores"    : 8
+    },
+
+    "radical.two" : {
+        "project"  : null,
+        "queue"    : null,
+        "schema"   : "ssh",
+        "cores"    : 8
+    }
+}
+

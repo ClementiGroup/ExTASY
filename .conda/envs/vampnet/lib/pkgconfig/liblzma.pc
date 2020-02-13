@@ -1,0 +1,19 @@
+#
+# Author: Lasse Collin
+#
+# This file has been put into the public domain.
+# You can do whatever you want with this file.
+#
+
+prefix=/gpfs/alpine/proj-shared/bip191/ExTASY/.conda/envs/vampnet
+exec_prefix=/gpfs/alpine/proj-shared/bip191/ExTASY/.conda/envs/vampnet
+libdir=/gpfs/alpine/proj-shared/bip191/ExTASY/.conda/envs/vampnet/lib
+includedir=/gpfs/alpine/proj-shared/bip191/ExTASY/.conda/envs/vampnet/include
+
+Name: liblzma
+Description: General purpose data compression library
+URL: https://tukaani.org/xz/
+Version: 5.2.4
+Cflags: -I${includedir}
+Libs: -L${libdir} -llzma
+Libs.private: -pthread 

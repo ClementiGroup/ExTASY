@@ -1,0 +1,49 @@
+{
+  "arch": "ppc64le",
+  "build": "hecc5488_0",
+  "build_number": 0,
+  "channel": "https://conda.anaconda.org/conda-forge/linux-ppc64le",
+  "constrains": [],
+  "depends": [],
+  "extracted_package_dir": "/ccs/home/hrlee/.conda/pkgs/ca-certificates-2019.11.28-hecc5488_0",
+  "features": "",
+  "files": [
+    "ssl/cacert.pem",
+    "ssl/cert.pem"
+  ],
+  "fn": "ca-certificates-2019.11.28-hecc5488_0.tar.bz2",
+  "license": "ISC",
+  "link": {
+    "source": "/ccs/home/hrlee/.conda/pkgs/ca-certificates-2019.11.28-hecc5488_0",
+    "type": 1
+  },
+  "md5": "977692f018470ffa819eda7cf8838b10",
+  "name": "ca-certificates",
+  "package_tarball_full_path": "/ccs/home/hrlee/.conda/pkgs/ca-certificates-2019.11.28-hecc5488_0.tar.bz2",
+  "paths_data": {
+    "paths": [
+      {
+        "_path": "ssl/cacert.pem",
+        "path_type": "hardlink",
+        "sha256": "732befe49c758070023448f619a3abb088f44e4f05992bc7478dae873be56ad8",
+        "sha256_in_prefix": "732befe49c758070023448f619a3abb088f44e4f05992bc7478dae873be56ad8",
+        "size_in_bytes": 281457
+      },
+      {
+        "_path": "ssl/cert.pem",
+        "path_type": "softlink",
+        "sha256": "732befe49c758070023448f619a3abb088f44e4f05992bc7478dae873be56ad8",
+        "size_in_bytes": 281457
+      }
+    ],
+    "paths_version": 1
+  },
+  "platform": "linux",
+  "requested_spec": "None",
+  "size": 148593,
+  "subdir": "linux-ppc64le",
+  "timestamp": 1574957744989,
+  "track_features": "",
+  "url": "https://conda.anaconda.org/conda-forge/linux-ppc64le/ca-certificates-2019.11.28-hecc5488_0.tar.bz2",
+  "version": "2019.11.28"
+}

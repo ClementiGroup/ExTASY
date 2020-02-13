@@ -198,7 +198,7 @@ while True:
     print("time0", time.time()-time_start)
     model = HDE(
       len(ca_pairs), 
-      n_components=4, 
+      n_components=vamp_dim, 
       n_epochs=vamp_epochs, 
       learning_rate=1e-4,
       lag_time=vamp_lag,

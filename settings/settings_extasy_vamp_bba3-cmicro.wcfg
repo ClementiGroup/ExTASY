@@ -1,13 +1,13 @@
 
 
-REMOTE_HOST             = 'ornl.summit'   #'ncsa.bw' 'ncsa.bw_aprun'     # Label/Name of the Remote Machine
-ALLOCATION              = 'BIP191'                    # Allocation to be charged
+REMOTE_HOST             = 'ornl.summit'  
+ALLOCATION              = 'BIP191'                   
 use_gpus                = 'True'
-QUEUE                   = 'batch' #'killable'#'batch' #'high'      #'normal'             # Name of the queue in the remote machine
+QUEUE                   = 'batch'
 schema                  = 'local'
 
 #--------------------------General--------------------------------
-WALLTIME                = 120 #1440 #120    #720    #1440    #120         # Walltime to be requested for the pilot in minutes
+WALLTIME                = 120 
 NODESIZE                = 9
 num_replicas            = 50                   #total num replica #num_parallel_MD_sim     = 5    #160           # Total Number of tasks or Compute Units
 GPUs_per_NODE           = 6
@@ -41,7 +41,7 @@ strategy                = 'cmicro'
 
 #--------------------------Analysis----------------------------------
 helper_scripts          = './helper_scripts'
-script_ana              = 'run-vamp3.py'    #'run-tica-msm5.py'
+script_ana              = 'run-vamp3.py' 
 
 reweight                = 'no'
 koopman                 = 'yes'
@@ -52,7 +52,7 @@ num_macrostates         = 20
 select_micro_within_macro_type    = 'sto_inv_linear'
 macrosstate_method      = 'kmeans'
 vamp_lag                = 30
-vamp_dim                = 10
+vamp_dim                = 4
 vamp_stride             = 1
 vamp_epochs             = 8
 kmeans_stride           = 50

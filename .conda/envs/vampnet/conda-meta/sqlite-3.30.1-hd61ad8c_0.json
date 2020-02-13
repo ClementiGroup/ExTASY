@@ -1,0 +1,110 @@
+{
+  "arch": "ppc64le",
+  "build": "hd61ad8c_0",
+  "build_number": 0,
+  "channel": "https://conda.anaconda.org/conda-forge/linux-ppc64le",
+  "constrains": [],
+  "depends": [
+    "libgcc-ng >=8.2.0",
+    "ncurses >=6.1,<6.2.0a0",
+    "readline >=8.0,<9.0a0"
+  ],
+  "extracted_package_dir": "/ccs/home/hrlee/.conda/pkgs/sqlite-3.30.1-hd61ad8c_0",
+  "features": "",
+  "files": [
+    "bin/sqlite3",
+    "include/sqlite3.h",
+    "include/sqlite3ext.h",
+    "lib/libsqlite3.a",
+    "lib/libsqlite3.so",
+    "lib/libsqlite3.so.0",
+    "lib/libsqlite3.so.0.8.6",
+    "lib/pkgconfig/sqlite3.pc",
+    "share/man/man1/sqlite3.1"
+  ],
+  "fn": "sqlite-3.30.1-hd61ad8c_0.tar.bz2",
+  "license": "Public-Domain (http://www.sqlite.org/copyright.html)",
+  "link": {
+    "source": "/ccs/home/hrlee/.conda/pkgs/sqlite-3.30.1-hd61ad8c_0",
+    "type": 1
+  },
+  "md5": "8ac9a97c115cf3f0e6796602925089db",
+  "name": "sqlite",
+  "package_tarball_full_path": "/ccs/home/hrlee/.conda/pkgs/sqlite-3.30.1-hd61ad8c_0.tar.bz2",
+  "paths_data": {
+    "paths": [
+      {
+        "_path": "bin/sqlite3",
+        "path_type": "hardlink",
+        "sha256": "e325cd23968d99ac338f2045739d12ff955b905d8c2d8abb0425d1236a2ec824",
+        "sha256_in_prefix": "e325cd23968d99ac338f2045739d12ff955b905d8c2d8abb0425d1236a2ec824",
+        "size_in_bytes": 2172296
+      },
+      {
+        "_path": "include/sqlite3.h",
+        "path_type": "hardlink",
+        "sha256": "5c4e58eef24c86bcce35d09017f48e3e7f71cf1fdcfcaf7932c4cf9f72131e1b",
+        "sha256_in_prefix": "5c4e58eef24c86bcce35d09017f48e3e7f71cf1fdcfcaf7932c4cf9f72131e1b",
+        "size_in_bytes": 564824
+      },
+      {
+        "_path": "include/sqlite3ext.h",
+        "path_type": "hardlink",
+        "sha256": "1bfef5f1972ef380fcf2679c64f3005b156a774a0c2144b023286f61a70cad95",
+        "sha256_in_prefix": "1bfef5f1972ef380fcf2679c64f3005b156a774a0c2144b023286f61a70cad95",
+        "size_in_bytes": 34156
+      },
+      {
+        "_path": "lib/libsqlite3.a",
+        "path_type": "hardlink",
+        "sha256": "02169b416da5e05ebefc106edc8971d94ff31124c5ed6b302f005e18aa8df8bf",
+        "sha256_in_prefix": "02169b416da5e05ebefc106edc8971d94ff31124c5ed6b302f005e18aa8df8bf",
+        "size_in_bytes": 2498184
+      },
+      {
+        "_path": "lib/libsqlite3.so",
+        "path_type": "softlink",
+        "sha256": "e6c31a4f8ac2f7dbd5e2e9b22723bda893c469efbf5148ac8a1b75cdb29412d0",
+        "size_in_bytes": 1963560
+      },
+      {
+        "_path": "lib/libsqlite3.so.0",
+        "path_type": "softlink",
+        "sha256": "e6c31a4f8ac2f7dbd5e2e9b22723bda893c469efbf5148ac8a1b75cdb29412d0",
+        "size_in_bytes": 1963560
+      },
+      {
+        "_path": "lib/libsqlite3.so.0.8.6",
+        "path_type": "hardlink",
+        "sha256": "e6c31a4f8ac2f7dbd5e2e9b22723bda893c469efbf5148ac8a1b75cdb29412d0",
+        "sha256_in_prefix": "e6c31a4f8ac2f7dbd5e2e9b22723bda893c469efbf5148ac8a1b75cdb29412d0",
+        "size_in_bytes": 1963560
+      },
+      {
+        "_path": "lib/pkgconfig/sqlite3.pc",
+        "file_mode": "text",
+        "path_type": "hardlink",
+        "prefix_placeholder": "/opt/anaconda1anaconda2anaconda3",
+        "sha256": "3c6ffd9420e0a86c8ac258449aa48517c733701b0fbda9eeae1ee5500b716357",
+        "sha256_in_prefix": "b87a5bff53ad5e0e17f8026effe5285740276b573bb31a1b913b3778365b5ac9",
+        "size_in_bytes": 304
+      },
+      {
+        "_path": "share/man/man1/sqlite3.1",
+        "path_type": "hardlink",
+        "sha256": "fb3333f3a5deabad321ca7c332e059cbf3b8bb1a39f24d95700876c2ddd26c86",
+        "sha256_in_prefix": "fb3333f3a5deabad321ca7c332e059cbf3b8bb1a39f24d95700876c2ddd26c86",
+        "size_in_bytes": 8928
+      }
+    ],
+    "paths_version": 1
+  },
+  "platform": "linux",
+  "requested_spec": "None",
+  "size": 2724053,
+  "subdir": "linux-ppc64le",
+  "timestamp": 1570803546391,
+  "track_features": "",
+  "url": "https://conda.anaconda.org/conda-forge/linux-ppc64le/sqlite-3.30.1-hd61ad8c_0.tar.bz2",
+  "version": "3.30.1"
+}

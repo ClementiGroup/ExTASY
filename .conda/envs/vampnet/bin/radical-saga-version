@@ -1,0 +1,5 @@
+#!/gpfs/alpine/proj-shared/bip191/ExTASY/.conda/envs/vampnet/bin/python3.7
+
+import radical.saga
+print(radical.saga.version_detail)
+
