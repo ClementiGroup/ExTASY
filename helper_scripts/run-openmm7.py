@@ -220,8 +220,11 @@ while True:
         print(Platform.getDefaultPluginsDirectory())
       sys.stdout.flush()
       simulation.context.setPositions(pdb.positions)
-      pbv = system.getDefaultPeriodicBoxVectors()
-      simulation.context.setPeriodicBoxVectors(*pbv)
+      #pbv = system.getDefaultPeriodicBoxVectors()
+      setboxval2=mdtraj.load(a_topology_pdb).unitcell_vectors[0]* u.nanometers
+      print("setboxval2", setboxval2)
+      simulation.context.setPeriodicBoxVectors(*setboxval2)
+      #simulation.context.setPeriodicBoxVectors(*pbv)
       # set velocities to temperature in integrator
       temperature = integrator.getTemperature()
       dt = integrator.getStepSize()
@@ -257,7 +260,10 @@ while True:
         np.load = np_load_old
         simulation.context.setPositions(arr['positions'] * u.nanometers)
         simulation.context.setVelocities(arr['velocities'] * u.nanometers/u.picosecond)
-        simulation.context.setPeriodicBoxVectors(*arr['box_vectors'] * u.nanometers)
+        setboxval2=mdtraj.load(a_topology_pdb).unitcell_vectors[0]* u.nanometers
+        print("setboxval2", setboxval2)
+        simulation.context.setPeriodicBoxVectors(*setboxval2)
+        #simulation.context.setPeriodicBoxVectors(*arr['box_vectors'] * u.nanometers)
         remainingsteps=arr['remainingsteps']
         print('restart remaining', remainingsteps)
         reporter=mdtraj.reporters.DCDReporter(savedcdfileextend, trajstride, atomSubset=prot_Select)

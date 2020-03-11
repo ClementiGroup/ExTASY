@@ -52,27 +52,22 @@ def create_workflow(Kconfig,args):
       iter_found+=1
     cur_iter=max(0,iter_found-1)
     print("cur_iter",cur_iter)
-    if cur_iter==0:
-      pre_proc_stage2 = Stage()
-      pre_proc_task2 = Task()
-      pre_proc_task2.pre_exec = ['export tasks=pre_proc_task','export iter=%s' % cur_iter, 'export OMP_NUM_THREADS=1']
-      pre_proc_task2.executable = ['ls']
-      pre_proc_task2.arguments = ['-l']
-      copy_arr= ['$SHARED/%s > %s/%s' % (config_file,combined_path, config_file),
-                                     '$SHARED/%s > %s/%s' % (Kconfig.md_run_file,combined_path,Kconfig.md_run_file)]
-      if Kconfig.md_run_file!=Kconfig.md_reference:
-        copy_arr=copy_arr+['$SHARED/%s > %s/%s' % (Kconfig.md_reference, combined_path, Kconfig.md_reference)]
-      if str(Kconfig.strategy)!='extend': 
-        copy_arr=copy_arr+['$SHARED/%s > %s/%s' % (script_ana,combined_path,script_ana)]
-      print("copy_arr", copy_arr)
-      pre_proc_task2.copy_input_data = copy_arr
-      pre_proc_task_ref2 = '$Pipeline_%s_Stage_%s_Task_%s' % (wf.uid, pre_proc_stage2.uid, pre_proc_task2.uid)
-      pre_proc_stage2.add_tasks(pre_proc_task2)
-      wf.add_stages(pre_proc_stage2)
+    #if cur_iter==0:
+    #  pre_proc_stage2 = Stage()
+    #  pre_proc_task2 = Task()
+    #  pre_proc_task2.pre_exec = ['export tasks=pre_proc_task','export iter=%s' % cur_iter, 'export OMP_NUM_THREADS=1']
+    #  pre_proc_task2.executable = ['ls']
+    #  pre_proc_task2.arguments = ['-l']
+    #  pre_proc_task2.copy_input_data = ['$SHARED/%s > %s/%s' % (config_file,combined_path, config_file),
+    #                                 '$SHARED/%s > %s/%s' % (script_ana,combined_path,script_ana),
+    #                                 '$SHARED/%s > %s/%s' % (Kconfig.md_run_file,combined_path,Kconfig.md_run_file),
+    #                                   '$SHARED/%s > %s/%s' % (Kconfig.md_reference, combined_path, Kconfig.md_reference)]# '$SHARED/%s > %s/%s' % ('analyze3.py', combined_path, 'analyze3.py') ] 
+    #  pre_proc_task_ref2 = '$Pipeline_%s_Stage_%s_Task_%s' % (wf.uid, pre_proc_stage2.uid, pre_proc_task2.uid)
+    #  pre_proc_stage2.add_tasks(pre_proc_task2)
+    #  wf.add_stages(pre_proc_stage2)
  
       # ------------------------------------------------------------------------------------------------------------------
-    start_iter=cur_iter
-    print("finished prep") 
+    start_iter=cur_iter 
     while(cur_iter <  int(Kconfig.num_iterations) and cur_iter<start_iter+1):
 
         # --------------------------------------------------------------------------------------------------------------
@@ -106,7 +101,7 @@ def create_workflow(Kconfig,args):
                                 }
           sim_task.cpu_reqs = { 'processes': 1, 
                                     'process_type': None, 
-                                    'threads_per_process': 20, 
+                                    'threads_per_process': 10, 
                                     'thread_type': 'OpenMP'
                                   }
           sim_task.arguments = ['run_openmm.py','--Kconfig', config_file, '--idxstart',str(num_allocated_rep), '--idxend',str(num_allocated_rep+use_replicas),
@@ -169,7 +164,7 @@ def create_workflow(Kconfig,args):
                                 }
           ana_task.cpu_reqs = { 'processes': 1, 
                                     'process_type': None, 
-                                    'threads_per_process': 20, 
+                                    'threads_per_process': 10, 
                                     'thread_type': 'OpenMP'
                                   }
           ana_task.arguments = [script_ana,'--Kconfig', config_file, '>', "analysis.log"]
@@ -214,7 +209,21 @@ if __name__ == '__main__':
           }
         elif Kconfig.use_gpus=='True':
           print("using gpus")
-          res_dict = {
+          if Kconfig.REMOTE_HOST == 'ornl.summit_prte':
+             res_dict = {
+            'resource': Kconfig.REMOTE_HOST,
+            'walltime': Kconfig.WALLTIME,
+            #'cores': Kconfig.PILOTSIZE,
+            'cpus': (Kconfig.NODESIZE+1)*Kconfig.CPUs_per_NODE,
+            #'cpu_processes': Kconfig.num_CUs_per_MD_replica,#PILOTSIZE,
+            'gpus': Kconfig.NODESIZE*Kconfig.GPUs_per_NODE,
+            'project': Kconfig.ALLOCATION,
+            'queue': Kconfig.QUEUE,
+            'schema': Kconfig.schema   
+            #'gsissh'
+            }	  
+          else:
+             res_dict = {
             'resource': Kconfig.REMOTE_HOST,
             'walltime': Kconfig.WALLTIME,
             #'cores': Kconfig.PILOTSIZE,
@@ -223,9 +232,10 @@ if __name__ == '__main__':
             'gpus': Kconfig.NODESIZE*Kconfig.GPUs_per_NODE,
             'project': Kconfig.ALLOCATION,
             'queue': Kconfig.QUEUE,
-            'schema': Kconfig.schema   
+            'schema': Kconfig.schema
             #'gsissh'
-          }	  
+            }
+
         else:
           print("use_gpus not recognized")
           
@@ -249,11 +259,9 @@ if __name__ == '__main__':
           shared_data_all=shared_data_all+['%s/%s' % (Kconfig.md_dir, systemxml),
                                            '%s/%s' % (Kconfig.md_dir, integratorxml),
                                            Kconfig.md_dir+Kconfig.md_reference,
-                                           Kconfig.md_run_dir+Kconfig.md_run_file]
-          if Kconfig.md_reference!=Kconfig.md_input_file:
-            shared_data_all=shared_data_all + [Kconfig.md_dir+Kconfig.md_input_file]
-          if str(Kconfig.strategy)!='extend':
-            shared_data_all=shared_data_all+['%s/%s' %(Kconfig.helper_scripts, script_ana)  ]
+                                           Kconfig.md_run_dir+Kconfig.md_run_file,
+                                           Kconfig.md_dir+Kconfig.md_input_file,
+                                          '%s/%s' %(Kconfig.helper_scripts, script_ana)  ]
         else:
           shared_data_all=shared_data_all+[Kconfig.md_dir+Kconfig.md_input_file,
                                            Kconfig.md_dir+Kconfig.md_reference,

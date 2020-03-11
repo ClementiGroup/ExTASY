@@ -126,6 +126,10 @@ kmeans_stride =Kconfig.kmeans_stride
 msm_states =Kconfig.msm_states
 msm_lag=Kconfig.msm_lag
 n_pick=Kconfig.num_replicas
+try: 
+  castride=Kconfig.castride
+except:
+  castride=1
 try:
   select_micro_within_macro_type = Kconfig.select_micro_within_macro_type
 except:
@@ -138,6 +142,37 @@ try:
   projection=Kconfig.projection
 except:
   projection='vamp'
+try:
+  learning_rate=float(Kconfig.learning_rate)
+except:
+  learning_rate=1e-4
+try:
+  hidden_layer_depth=int(Kconfig.hidden_layer_depth)
+except:
+  hidden_layer_depth=6
+try:
+  hidden_size=int(Kconfig.hidden_size)
+except:
+  hidden_size=50
+try:
+  if Kconfig.inverse_dist=="True":
+    inverse_dist=True
+  else:
+    inverse_dist=False
+except:
+  inverse_dist=False
+try:
+  activation=str(Kconfig.activation)
+except:
+  activation='tanh'
+try:
+  latent_space_noise=float(Kconfig.latent_space_noise)
+except:
+  latent_space_noise=0.1
+try:
+  dropout_rate=float(Kconfig.dropout_rate)
+except:
+  dropout_rate=0.1
 
 project_tica='True'
 refticapath='/gpfs/alpine/proj-shared/bip191/objchigtica1-tica.obj'
@@ -151,6 +186,14 @@ while True:
   mdlog=trajprotdir+'md_logs/analysisiter'+str(iter_found)+'.log'
   sys.stdout = open(mdlog,'a')
   time_start=time.time()
+  print("macrostate_method", macrostate_method)
+  print("projection", projection)
+  print("learning_rate", learning_rate)
+  print("hidden_layer_depth", hidden_layer_depth)
+  print("hidden_size", hidden_size)
+  print("inverse_dist", inverse_dist)
+  print("dropout_rate", dropout_rate)
+  print("latent_space_noise", latent_space_noise)
   print("iter_found", iter_found)
   print("strategy", Kconfig.strategy)
   print("########start")
@@ -159,11 +202,17 @@ while True:
   traj_fns0 = sorted(glob.glob(trajprotdir+"*.dcd"))
   traj_fns=[f for f in traj_fns0]# if time_start-os.stat(f).st_mtime>100]
   print("num trajs", len(traj_fns))
+  traj_tmp=mdtraj.load(traj_fns[0], top=topfile)
+  length_single=traj_tmp.xyz.shape[0]
+  print("length_single", length_single, "together", length_single*len(traj_fns))
+  vamp_stride=1+int(length_single*len(traj_fns)/1e6)
+  print("vamp_stride", vamp_stride)
   print(trajprotdir+'alltrajs/all'+traj_fns[0][len(trajprotdir):])
   #print(traj_fns)
   feat = pyemma.coordinates.featurizer(topfile)
-  allCA = feat.select('name CA')
-  ca_pairs=feat.pairs(allCA, excluded_neighbors=2)
+  allCA = feat.select('name CA')[::castride]
+  print('allCA', allCA)
+  ca_pairs=feat.pairs(allCA, excluded_neighbors=0)
   data=[]
   traj_fns2=[]
   for idx in range(len(traj_fns)):
@@ -174,40 +223,52 @@ while True:
       traj=mdtraj.load(traj_fns[idx], top=topfile)
       box=traj.unitcell_vectors#[0]
       orthogonal = np.allclose(traj.unitcell_angles, 90)
-      data.append(_distance_box_fast(traj.xyz, ca_pairs,box))
+      tmp_dist=_distance_box_fast(traj.xyz[::vamp_stride], ca_pairs,box)
+      if inverse_dist:
+         data.append(np.hstack((tmp_dist, 1./tmp_dist)))
+      else:
+         data.append(tmp_dist)
       traj_fns2.append(traj_fns[idx])
     except:
       print("failed load",traj_fns[idx])
 
   if projection=='vamp':
-    print(data[0].max())
+    print("datamax", data[0].max())
     scaler = pre.MinMaxScaler(feature_range=(-1, 1))
-    scaler.fit(data[0])
+    scaler.fit(np.concatenate(data))
     data2 = [scaler.transform(d) for d in data]
-    print("\n",data2[1].max())
-    print(len(data2))
-    nfeat = len(feat.describe())
-    print(nfeat)
-    lengthsall=max([data22.shape[0] for data22 in data2])
-    print("lengthsmax",lengthsall)
-    if lengthsall<vamp_lag:
+    print("max",data2[1].max())
+    print("len data2", len(data2), data2[0].shape)
+    nfeat = feat.dimension()
+    print("feat dimensions", nfeat)
+    lengthsmax=max([data22.shape[0] for data22 in data2])
+    print("lengthsmax",lengthsmax)
+    lengthsall=np.concatenate(data2)
+    print("lengthall", lengthsall.shape)
+    if lengthsmax<int(vamp_lag/vamp_stride):
       print("trajs not long enough")
       sys.stdout.flush()
       sleep(10)
       continue
     print("time0", time.time()-time_start)
+    if inverse_dist:
+      n_input=len(ca_pairs)*2
+    else:
+      n_input=len(ca_pairs)
+    print("n_input", n_input)
     model = HDE(
-      len(ca_pairs), 
+      n_input, 
       n_components=vamp_dim, 
       n_epochs=vamp_epochs, 
-      learning_rate=1e-4,
-      lag_time=vamp_lag,
+      learning_rate=learning_rate,
+      lag_time=int(vamp_lag/vamp_stride),
       batch_normalization=False,
       reversible=True,
-      hidden_layer_depth=6,
-      hidden_size=50,
-      activation='tanh',
-      latent_space_noise=0.1,
+      hidden_layer_depth=hidden_layer_depth,
+      hidden_size=hidden_size,
+      activation=activation,
+      latent_space_noise=latent_space_noise,
+      dropout_rate=dropout_rate,
       verbose=False
     )
     model.fit(data2)
@@ -221,16 +282,16 @@ while True:
     yall=yall_slow_modes
     yall_slow_modes.shape
     figX, axX,mi = pyemma.plots.plot_free_energy(yall_slow_modes[:,0], yall_slow_modes[:,1],legacy=False)
-    axX.set_xlabel('TICA 0')
-    axX.set_ylabel('TICA 1')
+    axX.set_xlabel('SRV 0')
+    axX.set_ylabel('SRV 1')
     figX.savefig(resultspath+name_data+"vampfe_i"+str(iter_found)+".png")
 
   if projection=='tica':
-    lengthsall=max([data22.shape[0] for data22 in data])
-    print("lengthsmax",lengthsall)
-    tica_obj_tmp = pyemma.coordinates.tica(data, lag=vamp_lag, dim=vamp_dim, kinetic_map=True, stride=vamp_stride, weights='empirical')
+    lengthsmax=max([data22.shape[0] for data22 in data])
+    print("lengthsmax",lengthsmax)
+    tica_obj_tmp = pyemma.coordinates.tica(data, lag=int(vamp_lag/vamp_stride), dim=vamp_dim, kinetic_map=True, stride=1, weights='empirical')
     print("time1", time.time()-time_start)
-    slow_modes = tica_obj_tmp.get_output(stride=vamp_stride)
+    slow_modes = tica_obj_tmp.get_output(stride=1)
     tica_timescales = tica_obj_tmp.timescales
     print("tica_timescales", tica_timescales)
     print("slow modes", slow_modes[0][0,:10])
@@ -254,7 +315,7 @@ while True:
     axX.set_xlabel('TICA 0')
     axX.set_ylabel('TICA 1')
     figX.savefig(resultspath+name_data+"ticaprojreffe_i"+str(iter_found)+".png")
-    if lengthsall>vamp_lag:
+    if False:
       tica_obj = pyemma.coordinates.tica(data,lag=vamp_lag, dim=4, kinetic_map = True, commute_map=False)
       yticaproj=np.concatenate(tica_obj.transform(data)) 
       figX, axX,mi = pyemma.plots.plot_free_energy(yticaproj[:,0], yticaproj[:,1],legacy=False)
@@ -268,12 +329,12 @@ while True:
     #if not enough states
     km = pyemma.coordinates.cluster_kmeans(slow_modes, k = min(msm_states, 100),max_iter=50) 
   dtrajs = km.dtrajs
-  if lengthsall<msm_lag:
+  if lengthsmax<int(msm_lag/vamp_stride):
     print("traj not long enough")
     sys.stdout.flush()
     sleep(10)
     continue
-  msm=pyemma.msm.estimate_markov_model(dtrajs, lag=msm_lag)
+  msm=pyemma.msm.estimate_markov_model(dtrajs, lag=int(msm_lag/vamp_stride))
   print("msm timescales", msm.timescales(10))
   c=msm.count_matrix_full
   s =  np.sum(c+c.T, axis=1)
@@ -299,8 +360,8 @@ while True:
     print("state_picks", state_picks)
     fig,ax = plt.subplots(nrows=1, figsize=(7,4.5), sharex=True)
     pyemma.plots.plot_free_energy(yall[:,0],yall[:,1], nbins=64, weights=np.concatenate(msm.trajectory_weights()), cmap='nipy_spectral', ax=ax,legacy=False)
-    ax.set_xlabel("TIC 1")
-    ax.set_ylabel("TIC 2")
+    ax.set_xlabel("SRV 1")
+    ax.set_ylabel("SRV 2")
     ax.scatter(km.cluster_centers_[:,0], km.cluster_centers_[:,1], c= 'gray', s=2, lw=0.5, edgecolor="k", label=f"states")
     ax.scatter(km.cluster_centers_[state_picks,0], km.cluster_centers_[state_picks,1], c='red',s=25, lw=0.5, edgecolor="k", label=f"cmicro")
     ax.legend( fontsize=8)#loc=5
@@ -369,8 +430,9 @@ while True:
     print("reweight", np.concatenate(msm.trajectory_weights()).min(),np.concatenate(msm.trajectory_weights()).max())
     macrostate_assignment_of_visited_microstates=all_assign.astype('int')
     macrostate_counts = np.array([np.sum(s[states_unique][macrostate_assignment_of_visited_microstates == macrostate_label]) for macrostate_label in range(macrostate_assignment_of_visited_microstates.max()+1)])
+    print("len not_connect", len(not_connect), 0.3*n_pick)
     if len(not_connect)<0.3*n_pick:
-      selected_macrostate=np.concatenate((sorted(select_restart_state(macrostate_counts[:num_macrostates], 'sto_inv_linear', np.arange(num_macrostates), nparallel=(n_pick-len(not_connect)))),np.arange(num_macrostates,len(macrostate_counts))))
+      selected_macrostate=np.concatenate((sorted(select_restart_state(macrostate_counts[:num_macrostates]+1, 'sto_inv_linear', np.arange(num_macrostates), nparallel=(n_pick-len(not_connect)))),np.arange(num_macrostates,len(macrostate_counts))))
     else:
       p=1./macrostate_counts
       p[macrostate_counts==0]=0
@@ -391,8 +453,8 @@ while True:
     plt.savefig(resultspath+name_data+"msmevspace_i"+str(iter_found)+".png")
     fig,ax = plt.subplots(nrows=1, figsize=(7,4.5), sharex=True)
     pyemma.plots.plot_free_energy(yall[:,0],yall[:,1], nbins=64, weights=np.concatenate(msm.trajectory_weights()), cmap='nipy_spectral', ax=ax,legacy=False)
-    ax.set_xlabel("TIC 1")
-    ax.set_ylabel("TIC 2")
+    ax.set_xlabel("SRV 1")
+    ax.set_ylabel("SRV 2")
     for i in range(num_macrostates):
       ax.scatter(km.cluster_centers_[macrostate_assignment_of_visited_microstates==i,0], 
                       km.cluster_centers_[macrostate_assignment_of_visited_microstates==i,1], 
@@ -409,7 +471,6 @@ while True:
         selected_macrostate_mask = (macrostate_assignment_of_visited_microstates == selected_macrostate[i])
         #print(selected_macrostate, microstate_transitions_used[visited_microstates], macrostate_counts, counts[states_unique][selected_macrostate])
         counts_in_selected_macrostate = s[states_unique][selected_macrostate_mask]+1
-        print(i,selected_macrostate[i], counts_in_selected_macrostate,visited_microstates[selected_macrostate_mask])
         #print(parameters['select_micro_within_macro_type'])
         if select_micro_within_macro_type == 'sto_inv_linear':
             # within a macrostate, select a microstate based on count
@@ -417,6 +478,7 @@ while True:
         elif select_micro_within_macro_type == 'rand': 
             add_microstate=select_restart_state(counts_in_selected_macrostate, 'rand', visited_microstates[selected_macrostate_mask], nparallel=1)
             #restart_state = [np.random.choice(visited_microstates[selected_macrostate_mask])] * nparallel
+        print(i,selected_macrostate[i],add_microstate, counts_in_selected_macrostate,visited_microstates[selected_macrostate_mask])
         restart_state=np.append(restart_state,add_microstate)
     state_picks=sorted(restart_state.astype('int'))
     print("state_picks",state_picks)
